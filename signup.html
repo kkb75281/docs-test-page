@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>가입 페이지</title>
+    </head>
+    <link rel="stylesheet" href="style.css" />
+    <body>
+        <a class="btn home" href="index.html">홈으로</a>
+        <p id="loggedUser"></p>
+        <h1>회원가입</h1>
+        <form class="form" onsubmit="handleSignup(event)">
+            <label>
+                이메일
+                <br />
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="user@email.com"
+                    required
+                />
+            </label>
+            <label>
+                비밀번호
+                <br />
+                <input
+                    type="password"
+                    name="password"
+                    minlength="6"
+                    placeholder="최소 6자리 이상 입력하세요."
+                    required
+                />
+            </label>
+            <fieldset>
+                <legend>옵션</legend>
+                <div class="radio-input-label">
+                    <input
+                        type="radio"
+                        id="confirmation"
+                        name="interest"
+                        value="confirmation"
+                    />
+                    <label for="confirmation">이메일 인증 절차 필요</label>
+                </div>
+                <div class="radio-input-label">
+                    <input
+                        type="radio"
+                        id="noConfirmation"
+                        name="interest"
+                        value="noConfirmation"
+                    />
+                    <label for="noConfirmation"
+                        >이메일 인증 없이 진행 (가입 성공 후 바로 로그인
+                        됨)</label
+                    >
+                </div>
+            </fieldset>
+            <br />
+            <input type="submit" value="Signup" />
+        </form>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+    <script src="service.js"></script>
+    <script>
+        function handleSignup(event) {
+            const selectedOption = document.querySelector(
+                'input[name="interest"]:checked'
+            );
+
+            let signupOptions;
+            if (selectedOption && selectedOption.value === "confirmation") {
+                // 이메일 인증 절차 필요
+                signupOptions = { signup_confirmation: "/welcome.html" };
+            } else if (
+                selectedOption &&
+                selectedOption.value === "noConfirmation"
+            ) {
+                // 이메일 인증 없이 진행
+                signupOptions = { login: true };
+            } else {
+                alert("옵션을 선택해주세요.");
+                event.preventDefault();
+                return;
+            }
+
+            skapi
+                .signup(event, signupOptions)
+                .then((r) => {
+                    window.location.href = "index.html";
+                    alert(r);
+                })
+                .catch((err) => alert(err.message));
+        }
+    </script>
+</html>

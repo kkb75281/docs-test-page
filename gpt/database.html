@@ -1,0 +1,3012 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Skapi Database Test</title>
+        <link rel="stylesheet" href="style.css" />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-top: 20px;
+            }
+            .panel {
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 20px;
+                background-color: #f9f9f9;
+            }
+            .panel h2 {
+                margin-top: 0;
+                border-bottom: 2px solid #007bff;
+                padding-bottom: 10px;
+            }
+            .panel h3 {
+                margin-top: 15px;
+                color: #007bff;
+                font-size: 16px;
+            }
+            #resultLog {
+                height: 500px;
+                overflow-y: auto;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 10px;
+                font-family: monospace;
+                font-size: 12px;
+            }
+            .result-item {
+                margin-bottom: 10px;
+                padding: 8px;
+                border-radius: 4px;
+                border-left: 3px solid #ccc;
+            }
+            .result-item.success {
+                background-color: #d4edda;
+                border-left-color: #28a745;
+            }
+            .result-item.error {
+                background-color: #f8d7da;
+                border-left-color: #dc3545;
+            }
+            .result-item.info {
+                background-color: #d1ecf1;
+                border-left-color: #17a2b8;
+            }
+            button {
+                padding: 8px 16px;
+                margin: 5px 5px 5px 0;
+                border: none;
+                border-radius: 4px;
+                background-color: #007bff;
+                color: white;
+                font-size: 14px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #0056b3;
+            }
+            button:disabled {
+                background-color: #6c757d;
+                cursor: not-allowed;
+            }
+            button.danger {
+                background-color: #dc3545;
+            }
+            button.danger:hover {
+                background-color: #c82333;
+            }
+            button.success {
+                background-color: #28a745;
+            }
+            button.success:hover {
+                background-color: #218838;
+            }
+            input[type="text"],
+            input[type="number"],
+            textarea,
+            select {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+            textarea {
+                min-height: 60px;
+                font-family: monospace;
+            }
+            .form-group {
+                margin-bottom: 15px;
+            }
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+                font-size: 13px;
+            }
+            .user-info {
+                background-color: #e9ecef;
+                padding: 10px;
+                border-radius: 4px;
+                margin-bottom: 15px;
+                font-size: 14px;
+            }
+            .tabs {
+                display: flex;
+                border-bottom: 2px solid #ddd;
+                margin-bottom: 15px;
+            }
+            .tab {
+                padding: 10px 20px;
+                cursor: pointer;
+                border: none;
+                background: none;
+                font-size: 14px;
+                font-weight: bold;
+                color: #666;
+                margin: 0;
+                border-radius: 0;
+            }
+            .tab.active {
+                color: #007bff;
+                border-bottom: 2px solid #007bff;
+            }
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+            }
+            .inline-group {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <a class="btn home" href="/index.html">홈으로</a>
+        <h1>🗄️ Skapi Database Test</h1>
+
+        <div class="user-info">
+            <strong>Logged User:</strong>
+            <span id="loggedUser">Not logged in</span>
+        </div>
+
+        <!-- Test Guide Panel -->
+        <div
+            class="panel"
+            style="background-color: #fff3cd; border-color: #ffc107"
+        >
+            <h2>📋 테스트 가이드</h2>
+            <details>
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🎯 기본 CRUD 테스트 순서
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>Create (생성)</strong>
+                        <ul>
+                            <li>
+                                Data에
+                                <code>{"name": "테스트", "age": 25}</code> 입력
+                            </li>
+                            <li>Table Name: <code>users</code></li>
+                            <li>Access Group: <code>public</code> 선택</li>
+                            <li>"Create Record" 버튼 클릭 → record_id 확인</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Read (조회)</strong>
+                        <ul>
+                            <li>Read 탭으로 이동</li>
+                            <li>Table Name: <code>users</code></li>
+                            <li>Access Group: <code>public</code></li>
+                            <li>
+                                "Get Records" 클릭 → 방금 생성한 데이터 확인
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Update (수정)</strong>
+                        <ul>
+                            <li>Update 탭으로 이동</li>
+                            <li>Record ID에 생성된 record_id 붙여넣기</li>
+                            <li>
+                                New Data:
+                                <code>{"name": "수정됨", "age": 30}</code>
+                            </li>
+                            <li>"Update Record" 클릭 → 수정 확인</li>
+                            <li>
+                                ⚠️ <strong>주의:</strong> New Data는 반드시
+                                입력해야 합니다 (빈 값 불가)
+                            </li>
+                            <li>
+                                ⚠️ <strong>주의:</strong> Access Group 변경 시
+                                권한 에러 발생 가능 (변경하지 말 것)
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Delete (삭제)</strong>
+                        <ul>
+                            <li>Delete 탭으로 이동</li>
+                            <li>Record IDs에 record_id 붙여넣기</li>
+                            <li>"Delete Records" 클릭 → 삭제 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🔍 인덱싱 & 검색 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>인덱스로 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Create 탭에서 Data:
+                                <code>{"title": "2024년 계획"}</code>
+                            </li>
+                            <li>Index Name: <code>year</code></li>
+                            <li>Index Value: <code>2024</code></li>
+                            <li>Create Record 클릭</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>여러 연도 데이터 생성</strong>
+                        <ul>
+                            <li>같은 방식으로 2023, 2025, 2026 데이터 생성</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>범위 검색</strong>
+                        <ul>
+                            <li>Read 탭에서 Index Name: <code>year</code></li>
+                            <li>
+                                Index Value: <code>2024</code>, Condition:
+                                <code>>=</code>
+                            </li>
+                            <li>Get Records → 2024 이상만 조회됨</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>정확한 값 검색</strong>
+                        <ul>
+                            <li>Condition을 <code>=</code>로 변경</li>
+                            <li>Get Records → 2024만 조회됨</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🏷️ 태그 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>태그로 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Create 탭에서 Data:
+                                <code>{"content": "중요 공지"}</code>
+                            </li>
+                            <li>Tags: <code>공지, 중요, 필독</code></li>
+                            <li>Create Record 클릭</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>태그로 검색</strong>
+                        <ul>
+                            <li>Read 탭에서 Tag: <code>중요</code></li>
+                            <li>Get Records → 해당 태그 포함 레코드만 조회</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>모든 태그 확인</strong>
+                        <ul>
+                            <li>Advanced Features → Info 탭</li>
+                            <li>"Get Tags" 클릭 → 모든 태그 목록 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🔗 레퍼런스 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>부모 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Create 탭에서 Data:
+                                <code>{"type": "부모"}</code>
+                            </li>
+                            <li>Table: <code>posts</code></li>
+                            <li>Create → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>자식 레코드 생성 (댓글)</strong>
+                        <ul>
+                            <li>
+                                Data:
+                                <code
+                                    >{"type": "댓글", "text": "좋은
+                                    글이네요"}</code
+                                >
+                            </li>
+                            <li>
+                                Reference Record ID에 부모 record_id 붙여넣기
+                            </li>
+                            <li>Create Record</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>레퍼런스로 조회</strong>
+                        <ul>
+                            <li>Read 탭에서 Reference에 부모 record_id 입력</li>
+                            <li>Get Records → 해당 게시물의 모든 댓글 조회</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    📁 파일 업로드 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>파일 업로드</strong>
+                        <ul>
+                            <li>Files 탭으로 이동</li>
+                            <li>Table Name: <code>my_files</code></li>
+                            <li>Description: <code>테스트 이미지</code></li>
+                            <li>Files에서 이미지/문서 선택</li>
+                            <li>"Upload Files" 클릭 → 진행률 확인</li>
+                            <li>업로드 완료 후 record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>파일 다운로드</strong>
+                        <ul>
+                            <li>
+                                Download File by Record ID에 record_id 붙여넣기
+                            </li>
+                            <li>
+                                "Get Files" 클릭 → 파일 정보 확인 및 다운로드
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    � Source Options (참조 제약) 테스트
+                </summary>
+
+                <h4 style="color: #007bff; margin-top: 10px">
+                    1️⃣ Referencing Limit (참조 개수 제한)
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>제한된 참조 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Create 탭에서 Data:
+                                <code>{"title": "한정 상품"}</code>
+                            </li>
+                            <li>Table: <code>limited_products</code></li>
+                            <li>
+                                Referencing Limit: <code>3</code> (최대 3개만
+                                참조 가능)
+                            </li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>참조 레코드 3개 생성</strong>
+                        <ul>
+                            <li>Data: <code>{"order": "주문1"}</code></li>
+                            <li>Reference Record ID에 위 record_id 붙여넣기</li>
+                            <li>
+                                Create Record 3번 반복 (주문1, 주문2, 주문3)
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>4번째 참조 시도 → 에러 확인</strong>
+                        <ul>
+                            <li>같은 방식으로 주문4 생성 시도</li>
+                            <li>❌ 참조 제한 초과 에러 발생 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h4 style="color: #007bff; margin-top: 15px">
+                    2️⃣ Prevent Multiple Referencing (중복 참조 방지)
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>중복 방지 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Data: <code>{"event": "선착순 이벤트"}</code>
+                            </li>
+                            <li>Table: <code>events</code></li>
+                            <li>✅ Prevent Multiple Referencing 체크</li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>첫 번째 참여 레코드 생성</strong>
+                        <ul>
+                            <li>Data: <code>{"participant": "참여"}</code></li>
+                            <li>Reference Record ID에 event record_id 입력</li>
+                            <li>Create Record → ✅ 성공</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>같은 사용자가 두 번째 참여 시도</strong>
+                        <ul>
+                            <li>동일한 방식으로 다시 참여 레코드 생성 시도</li>
+                            <li>❌ 이미 참조했다는 에러 발생 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h4 style="color: #007bff; margin-top: 15px">
+                    3️⃣ Only Granted Can Reference (권한자만 참조)
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>Private 레코드에 권한 제한 설정</strong>
+                        <ul>
+                            <li>Data: <code>{"content": "VIP 전용"}</code></li>
+                            <li>Table: <code>vip_posts</code></li>
+                            <li>Access Group: <code>private</code></li>
+                            <li>✅ Only Granted Can Reference 체크</li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>권한 부여</strong>
+                        <ul>
+                            <li>Advanced Features → Access 탭</li>
+                            <li>Record ID에 위 record_id 입력</li>
+                            <li>User ID to Grant에 특정 사용자 ID 입력</li>
+                            <li>Grant Private Access 클릭</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>권한 있는 사용자로 참조 테스트</strong>
+                        <ul>
+                            <li>권한 부여받은 계정으로 로그인</li>
+                            <li>
+                                Reference Record ID에 VIP 레코드 ID 입력하여
+                                생성 → ✅ 성공
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>권한 없는 사용자로 참조 시도</strong>
+                        <ul>
+                            <li>다른 계정으로 로그인하여 참조 시도</li>
+                            <li>❌ 권한 없음 에러 발생 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h4 style="color: #007bff; margin-top: 15px">
+                    4️⃣ Can Remove Referencing Records (참조 레코드 삭제)
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>연쇄 삭제 레코드 생성</strong>
+                        <ul>
+                            <li>Data: <code>{"post": "공지사항"}</code></li>
+                            <li>Table: <code>notices</code></li>
+                            <li>✅ Can Remove Referencing Records 체크</li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>참조 레코드 여러 개 생성</strong>
+                        <ul>
+                            <li>Data: <code>{"comment": "댓글1"}</code></li>
+                            <li>
+                                Reference Record ID에 공지사항 record_id 입력
+                            </li>
+                            <li>
+                                Create Record 3번 반복 (댓글1, 댓글2, 댓글3)
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>부모 레코드 삭제</strong>
+                        <ul>
+                            <li>Delete 탭에서 공지사항 record_id 입력</li>
+                            <li>Delete Records 클릭</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>참조 레코드 자동 삭제 확인</strong>
+                        <ul>
+                            <li>
+                                Read 탭에서 Table: <code>notices</code> 조회
+                            </li>
+                            <li>✅ 댓글들도 함께 삭제된 것 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h4 style="color: #007bff; margin-top: 15px">
+                    5️⃣ Allow Granted to Grant Others (권한 재부여)
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>권한 재부여 가능 레코드 생성</strong>
+                        <ul>
+                            <li>Data: <code>{"document": "기밀문서"}</code></li>
+                            <li>Access Group: <code>private</code></li>
+                            <li>✅ Only Granted Can Reference 체크</li>
+                            <li>✅ Allow Granted to Grant Others 체크</li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>사용자 A에게 권한 부여</strong>
+                        <ul>
+                            <li>Advanced Features → Access 탭</li>
+                            <li>
+                                Grant Private Access로 사용자 A에게 권한 부여
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>사용자 A가 사용자 B에게 권한 재부여</strong>
+                        <ul>
+                            <li>사용자 A 계정으로 로그인</li>
+                            <li>
+                                동일한 방식으로 사용자 B에게 Grant Private
+                                Access
+                            </li>
+                            <li>✅ 권한 재부여 성공 확인</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>사용자 B가 참조 가능한지 확인</strong>
+                        <ul>
+                            <li>사용자 B 계정으로 로그인</li>
+                            <li>기밀문서를 참조하는 레코드 생성 → ✅ 성공</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h4 style="color: #007bff; margin-top: 15px">
+                    6️⃣ Referencing Index Restrictions (인덱스 제약)
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>인덱스 제약 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Data: <code>{"product": "프리미엄 상품"}</code>
+                            </li>
+                            <li>Table: <code>premium_products</code></li>
+                            <li>
+                                Index Name: <code>status</code>, Value:
+                                <code>active</code>
+                            </li>
+                            <li>
+                                Referencing Index Restrictions:
+                                <code
+                                    >[{"name": "level", "value": "premium",
+                                    "condition": "="}]</code
+                                >
+                            </li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>조건 만족하는 레코드로 참조 (성공)</strong>
+                        <ul>
+                            <li>Data: <code>{"review": "좋아요"}</code></li>
+                            <li>
+                                Index Name: <code>level</code>, Value:
+                                <code>premium</code>
+                            </li>
+                            <li>Reference Record ID에 상품 record_id 입력</li>
+                            <li>Create Record → ✅ 성공</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>조건 불만족 레코드로 참조 시도 (실패)</strong>
+                        <ul>
+                            <li>Data: <code>{"review": "별로"}</code></li>
+                            <li>
+                                Index Name: <code>level</code>, Value:
+                                <code>basic</code>
+                            </li>
+                            <li>
+                                Reference Record ID에 동일한 상품 record_id 입력
+                            </li>
+                            <li>Create Record → ❌ 인덱스 제약 위반 에러</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>범위 조건 테스트</strong>
+                        <ul>
+                            <li>
+                                새 상품: Restrictions:
+                                <code
+                                    >[{"name": "age", "value": 18, "condition":
+                                    ">="}]</code
+                                >
+                            </li>
+                            <li>age >= 18인 레코드로 참조 → ✅ 성공</li>
+                            <li>age < 18인 레코드로 참조 → ❌ 실패</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h4 style="color: #28a745; margin-top: 15px">
+                    💡 복합 테스트 시나리오
+                </h4>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>한정판 VIP 이벤트</strong>
+                        <ul>
+                            <li>Referencing Limit: 10</li>
+                            <li>✅ Prevent Multiple Referencing</li>
+                            <li>✅ Only Granted Can Reference</li>
+                            <li>
+                                Restrictions:
+                                <code
+                                    >[{"name": "membership", "value":
+                                    "vip"}]</code
+                                >
+                            </li>
+                            <li>→ VIP만, 1인당 1번, 최대 10명만 참여 가능</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>프로젝트 관리 시스템</strong>
+                        <ul>
+                            <li>
+                                프로젝트: Can Remove Referencing Records
+                                (프로젝트 삭제 시 모든 작업 삭제)
+                            </li>
+                            <li>
+                                작업: Restrictions:
+                                <code
+                                    >[{"name": "status", "value":
+                                    "assigned"}]</code
+                                >
+                            </li>
+                            <li>→ 할당된 작업만 프로젝트에 연결 가능</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    �📰 구독 시스템 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>1단계: B 계정으로 A 구독하기 (중요!)</strong>
+                        <ul>
+                            <li>
+                                ⚠️
+                                <strong>먼저 구독을 해야 합니다!</strong> (구독
+                                전 레코드는 피드에 표시 안 됨)
+                            </li>
+                            <li>B 계정으로 로그인</li>
+                            <li>Advanced Features → Subscription 탭</li>
+                            <li>User ID to Subscribe에 A의 user_id 입력</li>
+                            <li>"Subscribe" 클릭</li>
+                            <li>"Get My Subscriptions" 클릭하여 구독 확인</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>2단계: A가 구독용 레코드 생성</strong>
+                        <ul>
+                            <li>A 계정으로 로그인</li>
+                            <li>
+                                Create 탭에서 Data:
+                                <code>{"title": "첫 번째 피드"}</code>
+                            </li>
+                            <li>
+                                Table: <code>feed</code> (또는 원하는 테이블명)
+                            </li>
+                            <li>
+                                Access Group: <code>public</code> 또는
+                                <code>authorized</code>
+                            </li>
+                            <li>
+                                ✅ <strong>Is Subscription Record</strong> 체크
+                                (필수!)
+                            </li>
+                            <li>
+                                ✅ <strong>Upload to Feed</strong> 체크 (필수!)
+                            </li>
+                            <li>✅ Notify Subscribers 체크 (선택)</li>
+                            <li>Create Record 클릭</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>3단계: B가 피드 확인</strong>
+                        <ul>
+                            <li>B 계정으로 다시 로그인</li>
+                            <li>Advanced Features → Subscription 탭</li>
+                            <li>"Get My Feed" 클릭 → A의 게시물 확인</li>
+                            <li>
+                                💡 Fetch More 체크하면 더 많은 피드 로드 가능
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>4단계: 추가 피드 테스트</strong>
+                        <ul>
+                            <li>A 계정으로 동일한 설정으로 레코드 추가 생성</li>
+                            <li>
+                                B 계정에서 "Get My Feed" → 새 게시물도 함께 표시
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>5단계: 구독 취소 및 차단</strong>
+                        <ul>
+                            <li>"Unsubscribe" → 구독 취소</li>
+                            <li>
+                                "Get My Feed" → A의 게시물 더 이상 표시 안 됨
+                            </li>
+                            <li>
+                                또는 A가 B를 차단: Block User ID에 B의 user_id
+                                입력 → "Block Subscriber" → 차단
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div
+                    style="
+                        background-color: #fff3cd;
+                        border: 1px solid #ffc107;
+                        border-radius: 4px;
+                        padding: 10px;
+                        margin-top: 10px;
+                    "
+                >
+                    <strong>⚠️ 중요 포인트:</strong>
+                    <ul style="margin: 5px 0">
+                        <li>
+                            <strong>구독 순서:</strong> 반드시 구독 먼저 → 그
+                            이후 생성된 레코드만 피드에 표시
+                        </li>
+                        <li>
+                            <strong>필수 체크박스:</strong> "Is Subscription
+                            Record" + "Upload to Feed" 둘 다 체크
+                        </li>
+                        <li>
+                            <strong>테이블명:</strong> 어떤 테이블명이든 가능
+                            (예: posts, feed, articles 등)
+                        </li>
+                        <li>
+                            <strong>Access Group:</strong> public 또는
+                            authorized 권장
+                        </li>
+                        <li>
+                            <strong>구독 취소:</strong> 구독 취소 시 과거 피드도
+                            모두 사라짐
+                        </li>
+                    </ul>
+                </div>
+
+                <div
+                    style="
+                        background-color: #f8d7da;
+                        border: 1px solid #dc3545;
+                        border-radius: 4px;
+                        padding: 10px;
+                        margin-top: 10px;
+                    "
+                >
+                    <strong>🔍 문제 해결:</strong>
+                    <ul style="margin: 5px 0">
+                        <li>
+                            <strong>피드가 안 보일 때:</strong>
+                            <ol>
+                                <li>
+                                    "Debug: Check Subscription Status" 클릭 →
+                                    구독 상태 확인
+                                </li>
+                                <li>
+                                    "Debug: Check Feed Records" 클릭 → 레코드가
+                                    제대로 생성되었는지 확인
+                                </li>
+                                <li>
+                                    두 체크박스(Is Subscription + Upload to
+                                    Feed)가 모두 체크되었는지 확인
+                                </li>
+                                <li>
+                                    구독한 이후에 레코드가 생성되었는지 확인
+                                </li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🔐 프라이빗 접근 관리 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>Private 레코드 생성</strong>
+                        <ul>
+                            <li>
+                                Create 탭에서 Data:
+                                <code>{"secret": "비밀정보"}</code>
+                            </li>
+                            <li>Access Group: <code>private</code> 선택</li>
+                            <li>Create Record → record_id 복사</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>접근 권한 부여</strong>
+                        <ul>
+                            <li>Advanced Features → Access 탭</li>
+                            <li>Record ID에 private record_id 입력</li>
+                            <li>User ID to Grant에 접근 허용할 user_id 입력</li>
+                            <li>"Grant Private Access" 클릭</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>접근 목록 확인</strong>
+                        <ul>
+                            <li>
+                                "List Private Access Grants" → 누가 접근
+                                가능한지 확인
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>접근 권한 제거</strong>
+                        <ul>
+                            <li>"Remove Private Access" 클릭 → 권한 제거</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    📊 데이터베이스 정보 조회
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>모든 테이블 확인</strong>
+                        <ul>
+                            <li>Advanced Features → Info 탭</li>
+                            <li>"Get All Tables" → 생성된 모든 테이블 목록</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>인덱스 정보</strong>
+                        <ul>
+                            <li>"Get Indexes" → 모든 인덱스 목록</li>
+                            <li>
+                                특정 인덱스 상세 정보: Table Name과 Index Name
+                                입력 후 "Get Index Info"
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Unique ID 조회</strong>
+                        <ul>
+                            <li>
+                                Get Unique IDs starting with에 prefix 입력 (예:
+                                <code>user_</code>)
+                            </li>
+                            <li>
+                                "Get Unique IDs" → 해당 prefix로 시작하는 모든
+                                unique_id
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🎨 고급 시나리오 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>블로그 시스템 시뮬레이션</strong>
+                        <ul>
+                            <li>
+                                게시물 생성: table=<code>blog_posts</code>,
+                                index=<code>category</code>, tags=<code
+                                    >개발,튜토리얼</code
+                                >
+                            </li>
+                            <li>
+                                댓글 생성: reference에 게시물 ID, table=<code
+                                    >comments</code
+                                >
+                            </li>
+                            <li>카테고리별 조회: index로 검색</li>
+                            <li>태그로 관련 포스트 찾기</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>이커머스 상품 관리</strong>
+                        <ul>
+                            <li>
+                                상품 생성: table=<code>products</code>,
+                                index=<code>price</code>
+                            </li>
+                            <li>
+                                가격 범위 검색: condition <code>>=</code>,
+                                <code><=</code> 사용
+                            </li>
+                            <li>상품 이미지: Files 탭에서 업로드</li>
+                            <li>리뷰: reference로 상품에 연결</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>소셜 미디어 기능</strong>
+                        <ul>
+                            <li>
+                                게시물: table=<code>feed</code>, upload_to_feed
+                                체크
+                            </li>
+                            <li>다른 사용자 구독</li>
+                            <li>피드 조회로 구독한 사람들 게시물 확인</li>
+                            <li>차단 기능 테스트</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+        </div>
+
+        <div class="container">
+            <!-- Left Panel: Database Operations -->
+            <div class="panel">
+                <h2>📝 Database Operations</h2>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('create')">
+                        Create
+                    </button>
+                    <button class="tab" onclick="switchTab('read')">
+                        Read
+                    </button>
+                    <button class="tab" onclick="switchTab('update')">
+                        Update
+                    </button>
+                    <button class="tab" onclick="switchTab('delete')">
+                        Delete
+                    </button>
+                    <button class="tab" onclick="switchTab('file')">
+                        Files
+                    </button>
+                </div>
+
+                <!-- CREATE TAB -->
+                <div id="tab-create" class="tab-content active">
+                    <h3>📄 Create Record</h3>
+
+                    <div class="form-group">
+                        <label>Data (JSON):</label>
+                        <textarea
+                            id="createData"
+                            placeholder='{"key": "value"}'
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Table Name:</label>
+                        <input
+                            type="text"
+                            id="createTableName"
+                            placeholder="my_table"
+                        />
+                    </div>
+
+                    <div class="inline-group">
+                        <div class="form-group">
+                            <label>Access Group:</label>
+                            <select id="createAccessGroup">
+                                <option value="public">Public</option>
+                                <option value="authorized">Authorized</option>
+                                <option value="private">Private</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="99">Admin (99)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Unique ID (optional):</label>
+                            <input
+                                type="text"
+                                id="createUniqueId"
+                                placeholder="my_unique_id"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Index Name (optional):</label>
+                        <input
+                            type="text"
+                            id="createIndexName"
+                            placeholder="year"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Index Value (optional):</label>
+                        <input
+                            type="text"
+                            id="createIndexValue"
+                            placeholder="2024"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tags (comma separated, optional):</label>
+                        <input
+                            type="text"
+                            id="createTags"
+                            placeholder="tag1, tag2"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reference Record ID (optional):</label>
+                        <input
+                            type="text"
+                            id="createReference"
+                            placeholder="record_id_to_reference"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="createReadonly" />
+                            Readonly (레코드 수정 불가)
+                        </label>
+                    </div>
+
+                    <h3
+                        style="
+                            margin-top: 20px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 15px;
+                        "
+                    >
+                        📢 Subscription Options (구독 설정)
+                    </h3>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="createUploadToFeed" />
+                            Upload to Feed (구독자 피드에 표시)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="createNotifySubscribers"
+                            />
+                            Notify Subscribers (구독자에게 알림 전송)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="createFeedReferencingRecords"
+                            />
+                            Feed Referencing Records (참조 레코드를 구독자
+                            피드에 포함)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="createNotifyReferencingRecords"
+                            />
+                            Notify Referencing Records (참조 레코드를 구독자에게
+                            알림)
+                        </label>
+                    </div>
+
+                    <h3
+                        style="
+                            margin-top: 20px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 15px;
+                        "
+                    >
+                        🔗 Source Options (참조 제약 설정)
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Referencing Limit (0 = infinite):</label>
+                        <input
+                            type="number"
+                            id="createSourceRefLimit"
+                            placeholder="0"
+                            min="0"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="createSourcePreventMultiple"
+                            />
+                            Prevent Multiple Referencing (한 사용자가 이
+                            레코드를 한 번만 참조 가능)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="createSourceOnlyGranted"
+                            />
+                            Only Granted Can Reference (권한 부여받은 사용자만
+                            참조 가능)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="createSourceCanRemove" />
+                            Can Remove Referencing Records (소유자가 참조 레코드
+                            삭제 가능 / 이 레코드 삭제 시 참조 레코드도 삭제)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="createSourceAllowGrantOthers"
+                            />
+                            Allow Granted to Grant Others (권한 받은 사용자가
+                            다른 사용자에게 권한 부여 가능)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label
+                            >Referencing Index Restrictions (JSON Array,
+                            optional):</label
+                        >
+                        <textarea
+                            id="createSourceIndexRestrictions"
+                            placeholder='[{"name": "status", "value": "active", "condition": "="}]'
+                            style="min-height: 80px"
+                        ></textarea>
+                        <small
+                            style="color: #666; display: block; margin-top: 5px"
+                        >
+                            예: [{"name": "category", "value": "premium"},
+                            {"name": "year", "value": 2024, "condition": ">="}]
+                        </small>
+                    </div>
+
+                    <button onclick="createRecord()" class="success">
+                        Create Record
+                    </button>
+                </div>
+
+                <!-- READ TAB -->
+                <div id="tab-read" class="tab-content">
+                    <h3>📖 Read Records</h3>
+
+                    <div class="form-group">
+                        <label>Record ID (optional):</label>
+                        <input
+                            type="text"
+                            id="readRecordId"
+                            placeholder="record_id_to_fetch"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Unique ID (optional):</label>
+                        <input
+                            type="text"
+                            id="readUniqueId"
+                            placeholder="unique_id_to_fetch"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Table Name:</label>
+                        <input
+                            type="text"
+                            id="readTableName"
+                            placeholder="my_table"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Access Group:</label>
+                        <select id="readAccessGroup">
+                            <option value="public">Public</option>
+                            <option value="authorized">Authorized</option>
+                            <option value="private">Private</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="99">Admin (99)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Index Name (optional):</label>
+                        <input
+                            type="text"
+                            id="readIndexName"
+                            placeholder="year"
+                        />
+                    </div>
+
+                    <div class="inline-group">
+                        <div class="form-group">
+                            <label>Index Value (optional):</label>
+                            <input
+                                type="text"
+                                id="readIndexValue"
+                                placeholder="2024"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Condition:</label>
+                            <select id="readIndexCondition">
+                                <option value="=">=</option>
+                                <option value=">">></option>
+                                <option value=">=">>=</option>
+                                <option value="<"><</option>
+                                <option value="<="><=</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tag (optional):</label>
+                        <input
+                            type="text"
+                            id="readTag"
+                            placeholder="tag_to_search"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reference (optional):</label>
+                        <input
+                            type="text"
+                            id="readReference"
+                            placeholder="record_id or user_id"
+                        />
+                    </div>
+
+                    <div class="inline-group">
+                        <div class="form-group">
+                            <label>Limit:</label>
+                            <input
+                                type="number"
+                                id="readLimit"
+                                value="50"
+                                min="1"
+                                max="1000"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    id="readAscending"
+                                    checked
+                                />
+                                Ascending
+                            </label>
+                            <label>
+                                <input type="checkbox" id="readFetchMore" />
+                                Fetch More
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="getRecords()">Get Records</button>
+                </div>
+
+                <!-- UPDATE TAB -->
+                <div id="tab-update" class="tab-content">
+                    <h3>✏️ Update Record</h3>
+
+                    <div
+                        style="
+                            background-color: #d1ecf1;
+                            padding: 10px;
+                            border-radius: 4px;
+                            margin-bottom: 15px;
+                            font-size: 13px;
+                            border: 1px solid #17a2b8;
+                        "
+                    >
+                        💡 <strong>Tip:</strong> Record ID를 입력하고 "Load
+                        Record" 버튼을 먼저 클릭하세요. 현재 레코드 상태가
+                        자동으로 불러와집니다.
+                    </div>
+
+                    <div class="form-group">
+                        <label>Record ID (required):</label>
+                        <input
+                            type="text"
+                            id="updateRecordId"
+                            placeholder="record_id_to_update"
+                        />
+                    </div>
+
+                    <button
+                        onclick="loadRecordForUpdate()"
+                        style="background-color: #17a2b8; margin-bottom: 15px"
+                    >
+                        📥 Load Record
+                    </button>
+
+                    <div
+                        id="updateRecordInfo"
+                        style="
+                            display: none;
+                            background-color: #d4edda;
+                            border: 1px solid #28a745;
+                            border-radius: 4px;
+                            padding: 10px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        <strong>✅ Record Loaded</strong>
+                        <div
+                            id="updateRecordInfoContent"
+                            style="margin-top: 5px; font-size: 12px"
+                        ></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data (JSON):</label>
+                        <textarea
+                            id="updateData"
+                            placeholder='{"key": "value"}'
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Table Name:</label>
+                        <input
+                            type="text"
+                            id="updateTableName"
+                            placeholder="table_name"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Access Group:</label>
+                        <select id="updateAccessGroup">
+                            <option value="">Select access group</option>
+                            <option value="public">Public</option>
+                            <option value="authorized">Authorized</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+
+                    <h3
+                        style="
+                            margin-top: 20px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 15px;
+                        "
+                    >
+                        📢 Subscription Options
+                    </h3>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="updateUploadToFeed" />
+                            Upload to Feed
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateNotifySubscribers"
+                            />
+                            Notify Subscribers
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateFeedReferencingRecords"
+                            />
+                            Feed Referencing Records
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateNotifyReferencingRecords"
+                            />
+                            Notify Referencing Records
+                        </label>
+                    </div>
+
+                    <h3
+                        style="
+                            margin-top: 20px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 15px;
+                        "
+                    >
+                        🔗 Source Options (참조 제약)
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Referencing Limit (0 = infinite):</label>
+                        <input
+                            type="number"
+                            id="updateSourceRefLimit"
+                            placeholder="0"
+                            min="0"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateSourcePreventMultiple"
+                            />
+                            Prevent Multiple Referencing
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateSourceOnlyGranted"
+                            />
+                            Only Granted Can Reference
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="updateSourceCanRemove" />
+                            Can Remove Referencing Records
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateSourceAllowGrantOthers"
+                            />
+                            Allow Granted to Grant Others
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label
+                            >Referencing Index Restrictions (JSON Array):</label
+                        >
+                        <textarea
+                            id="updateSourceIndexRestrictions"
+                            placeholder='[{"name": "status", "value": "active", "condition": "="}]'
+                            style="min-height: 80px"
+                        ></textarea>
+                    </div>
+
+                    <button onclick="updateRecord()">Update Record</button>
+                </div>
+
+                <!-- DELETE TAB -->
+                <div id="tab-delete" class="tab-content">
+                    <h3>🗑️ Delete Records</h3>
+
+                    <div class="form-group">
+                        <label>Record IDs (comma separated):</label>
+                        <input
+                            type="text"
+                            id="deleteRecordIds"
+                            placeholder="record_id_1, record_id_2"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>OR Delete by Query:</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Table Name:</label>
+                        <input
+                            type="text"
+                            id="deleteTableName"
+                            placeholder="my_table"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Access Group:</label>
+                        <select id="deleteAccessGroup">
+                            <option value="">All</option>
+                            <option value="public">Public</option>
+                            <option value="authorized">Authorized</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+
+                    <button onclick="deleteRecords()" class="danger">
+                        Delete Records
+                    </button>
+                </div>
+
+                <!-- FILE TAB -->
+                <div id="tab-file" class="tab-content">
+                    <h3>📁 File Operations</h3>
+
+                    <form id="fileUploadForm" onsubmit="uploadFile(event)">
+                        <div class="form-group">
+                            <label>Table Name:</label>
+                            <input
+                                type="text"
+                                name="tableName"
+                                placeholder="my_files"
+                                required
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <input
+                                type="text"
+                                name="description"
+                                placeholder="File description"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Files:</label>
+                            <input type="file" name="files" multiple />
+                        </div>
+
+                        <div id="uploadProgress" style="display: none">
+                            <div
+                                style="
+                                    background: #e9ecef;
+                                    border-radius: 4px;
+                                    overflow: hidden;
+                                    margin: 10px 0;
+                                "
+                            >
+                                <div
+                                    id="progressBar"
+                                    style="
+                                        background: #007bff;
+                                        height: 20px;
+                                        width: 0%;
+                                        transition: width 0.3s;
+                                    "
+                                ></div>
+                            </div>
+                            <div
+                                id="progressText"
+                                style="text-align: center; font-size: 12px"
+                            ></div>
+                        </div>
+
+                        <button type="submit">Upload Files</button>
+                    </form>
+
+                    <hr />
+
+                    <div class="form-group">
+                        <label>Download File by Record ID:</label>
+                        <input
+                            type="text"
+                            id="downloadRecordId"
+                            placeholder="record_id_with_files"
+                        />
+                    </div>
+                    <button onclick="downloadFile()">Get Files</button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Advanced Features -->
+            <div class="panel">
+                <h2>🚀 Advanced Features</h2>
+
+                <div class="tabs">
+                    <button
+                        class="tab active"
+                        onclick="switchAdvancedTab('subscription')"
+                    >
+                        Subscription
+                    </button>
+                    <button class="tab" onclick="switchAdvancedTab('access')">
+                        Access
+                    </button>
+                    <button class="tab" onclick="switchAdvancedTab('info')">
+                        Info
+                    </button>
+                </div>
+
+                <!-- SUBSCRIPTION TAB -->
+                <div id="adv-tab-subscription" class="tab-content active">
+                    <h3>📰 Subscription</h3>
+
+                    <div class="form-group">
+                        <label>User ID to Subscribe:</label>
+                        <input
+                            type="text"
+                            id="subscribeUserId"
+                            placeholder="user_id_to_subscribe"
+                        />
+                    </div>
+                    <button onclick="subscribe()">Subscribe</button>
+                    <button onclick="unsubscribe()" class="danger">
+                        Unsubscribe
+                    </button>
+
+                    <hr />
+
+                    <div class="form-group">
+                        <label>Block User ID:</label>
+                        <input
+                            type="text"
+                            id="blockUserId"
+                            placeholder="user_id_to_block"
+                        />
+                    </div>
+                    <button onclick="blockSubscriber()" class="danger">
+                        Block Subscriber
+                    </button>
+                    <button onclick="unblockSubscriber()">
+                        Unblock Subscriber
+                    </button>
+
+                    <hr />
+
+                    <h3 style="margin-top: 20px">📰 Feed</h3>
+
+                    <div class="form-group">
+                        <label>Access Group:</label>
+                        <select id="feedAccessGroup">
+                            <option value="">No Setting</option>
+                            <option value="0">0 - Public</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="99">99</option>
+                        </select>
+                    </div>
+
+                    <div class="inline-group">
+                        <div class="form-group">
+                            <label>Limit:</label>
+                            <input
+                                type="number"
+                                id="feedLimit"
+                                value="50"
+                                min="1"
+                                max="1000"
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="feedFetchMore" />
+                                Fetch More
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="getSubscriptions()">
+                        Get My Subscriptions
+                    </button>
+                    <button onclick="getFeed()">Get My Feed</button>
+
+                    <hr />
+                    <h4 style="color: #dc3545; margin-top: 15px">
+                        🔍 Debug Tools
+                    </h4>
+                    <button
+                        onclick="debugSubscription()"
+                        style="background-color: #ffc107; color: #000"
+                    >
+                        Debug: Check Subscription Status
+                    </button>
+                    <button
+                        onclick="debugFeedRecords()"
+                        style="background-color: #17a2b8"
+                    >
+                        Debug: Check Feed Records
+                    </button>
+                </div>
+
+                <!-- ACCESS TAB -->
+                <div id="adv-tab-access" class="tab-content">
+                    <h3>🔐 Private Access</h3>
+
+                    <div class="form-group">
+                        <label>Record ID:</label>
+                        <input
+                            type="text"
+                            id="accessRecordId"
+                            placeholder="record_id"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>User ID to Grant/Remove:</label>
+                        <input
+                            type="text"
+                            id="accessUserId"
+                            placeholder="user_id"
+                        />
+                    </div>
+
+                    <button onclick="grantPrivateAccess()" class="success">
+                        Grant Private Access
+                    </button>
+                    <button onclick="removePrivateAccess()" class="danger">
+                        Remove Private Access
+                    </button>
+
+                    <hr />
+
+                    <button onclick="listPrivateAccess()">
+                        List Private Access Grants
+                    </button>
+                </div>
+
+                <!-- INFO TAB -->
+                <div id="adv-tab-info" class="tab-content">
+                    <h3>📊 Database Information</h3>
+
+                    <button onclick="getTables()">Get All Tables</button>
+                    <button onclick="getIndexes()">Get Indexes</button>
+                    <button onclick="getTags()">Get Tags</button>
+
+                    <hr />
+
+                    <div class="form-group">
+                        <label>Get Unique IDs starting with:</label>
+                        <input
+                            type="text"
+                            id="uniqueIdPrefix"
+                            placeholder="prefix_"
+                        />
+                    </div>
+                    <button onclick="getUniqueIds()">Get Unique IDs</button>
+
+                    <hr />
+
+                    <div class="form-group">
+                        <label>Table Name for Index Info:</label>
+                        <input
+                            type="text"
+                            id="indexTableName"
+                            placeholder="my_table"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Index Name:</label>
+                        <input type="text" id="indexName" placeholder="year" />
+                    </div>
+                    <button onclick="getIndexInfo()">Get Index Info</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Log Panel (Full Width) -->
+        <div class="panel" style="margin-top: 20px">
+            <h2>📋 Result Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="resultLog"></div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+        <script src="../service.js"></script>
+        <script>
+            // Tab switching
+            function switchTab(tab) {
+                document.querySelectorAll("#tab-" + tab).forEach((el) => {
+                    document
+                        .querySelectorAll(".tab-content")
+                        .forEach((tc) => tc.classList.remove("active"));
+                    document
+                        .querySelectorAll(".tab")
+                        .forEach((t) => t.classList.remove("active"));
+                    el.classList.add("active");
+                    event.target.classList.add("active");
+                });
+            }
+
+            function switchAdvancedTab(tab) {
+                document.querySelectorAll("#adv-tab-" + tab).forEach((el) => {
+                    document
+                        .querySelectorAll(
+                            "#adv-tab-subscription, #adv-tab-access, #adv-tab-info"
+                        )
+                        .forEach((tc) => tc.classList.remove("active"));
+                    document
+                        .querySelectorAll(".panel:nth-child(2) .tab")
+                        .forEach((t) => t.classList.remove("active"));
+                    el.classList.add("active");
+                    event.target.classList.add("active");
+                });
+            }
+
+            // Log functions
+            function addLog(type, title, data) {
+                const log = document.getElementById("resultLog");
+                const item = document.createElement("div");
+                item.className = `result-item ${type}`;
+
+                const time = new Date().toLocaleTimeString("ko-KR");
+                item.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 5px;">${title}</div>
+                <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(
+                    data,
+                    null,
+                    2
+                )}</pre>
+                <div style="font-size: 10px; color: #666; margin-top: 5px;">${time}</div>
+            `;
+
+                log.insertBefore(item, log.firstChild);
+            }
+
+            function clearLog() {
+                document.getElementById("resultLog").innerHTML = "";
+            }
+
+            // ==================== CREATE ====================
+            async function createRecord() {
+                try {
+                    const dataStr = document
+                        .getElementById("createData")
+                        .value.trim();
+                    const data = dataStr ? JSON.parse(dataStr) : null;
+
+                    const config = {
+                        table: {
+                            name:
+                                document.getElementById("createTableName")
+                                    .value || "test_table",
+                            access_group:
+                                document.getElementById("createAccessGroup")
+                                    .value,
+                        },
+                    };
+
+                    const uniqueId = document
+                        .getElementById("createUniqueId")
+                        .value.trim();
+                    if (uniqueId) config.unique_id = uniqueId;
+
+                    const indexName = document
+                        .getElementById("createIndexName")
+                        .value.trim();
+                    const indexValue = document
+                        .getElementById("createIndexValue")
+                        .value.trim();
+                    if (indexName && indexValue) {
+                        config.index = {
+                            name: indexName,
+                            value: isNaN(indexValue)
+                                ? indexValue
+                                : Number(indexValue),
+                        };
+                    }
+
+                    const tags = document
+                        .getElementById("createTags")
+                        .value.trim();
+                    if (tags)
+                        config.tags = tags.split(",").map((t) => t.trim());
+
+                    const reference = document
+                        .getElementById("createReference")
+                        .value.trim();
+                    if (reference) config.reference = reference;
+
+                    if (document.getElementById("createReadonly").checked)
+                        config.readonly = true;
+
+                    // Subscription options
+                    const uploadFeedChecked =
+                        document.getElementById("createUploadToFeed").checked;
+                    const notifySubChecked = document.getElementById(
+                        "createNotifySubscribers"
+                    ).checked;
+                    const feedRefChecked = document.getElementById(
+                        "createFeedReferencingRecords"
+                    ).checked;
+                    const notifyRefChecked = document.getElementById(
+                        "createNotifyReferencingRecords"
+                    ).checked;
+
+                    if (
+                        uploadFeedChecked ||
+                        notifySubChecked ||
+                        feedRefChecked ||
+                        notifyRefChecked
+                    ) {
+                        config.table.subscription = {};
+
+                        if (uploadFeedChecked) {
+                            config.table.subscription.upload_to_feed = true;
+                        }
+                        if (notifySubChecked) {
+                            config.table.subscription.notify_subscribers = true;
+                        }
+                        if (feedRefChecked) {
+                            config.table.subscription.feed_referencing_records = true;
+                        }
+                        if (notifyRefChecked) {
+                            config.table.subscription.notify_referencing_records = true;
+                        }
+                    }
+
+                    // Source options
+                    const sourceOptions = {};
+
+                    const refLimit = document
+                        .getElementById("createSourceRefLimit")
+                        .value.trim();
+                    if (refLimit !== "") {
+                        const limitNum = Number(refLimit);
+                        sourceOptions.referencing_limit =
+                            limitNum === 0 ? null : limitNum;
+                    }
+
+                    if (
+                        document.getElementById("createSourcePreventMultiple")
+                            .checked
+                    ) {
+                        sourceOptions.prevent_multiple_referencing = true;
+                    }
+
+                    if (
+                        document.getElementById("createSourceOnlyGranted")
+                            .checked
+                    ) {
+                        sourceOptions.only_granted_can_reference = true;
+                    }
+
+                    if (
+                        document.getElementById("createSourceCanRemove").checked
+                    ) {
+                        sourceOptions.can_remove_referencing_records = true;
+                    }
+
+                    if (
+                        document.getElementById("createSourceAllowGrantOthers")
+                            .checked
+                    ) {
+                        sourceOptions.allow_granted_to_grant_others = true;
+                    }
+
+                    const indexRestrictions = document
+                        .getElementById("createSourceIndexRestrictions")
+                        .value.trim();
+                    if (indexRestrictions) {
+                        try {
+                            sourceOptions.referencing_index_restrictions =
+                                JSON.parse(indexRestrictions);
+                        } catch (e) {
+                            alert(
+                                "Invalid JSON format for referencing_index_restrictions"
+                            );
+                            return;
+                        }
+                    }
+
+                    // Only add source if at least one option is set
+                    if (Object.keys(sourceOptions).length > 0) {
+                        config.source = sourceOptions;
+                    }
+
+                    const result = await skapi.postRecord(data, config);
+                    addLog("success", "✅ Record Created", result);
+                } catch (error) {
+                    addLog("error", "❌ Create Failed", error.message);
+                }
+            }
+
+            // ==================== READ ====================
+            async function getRecords() {
+                try {
+                    const query = {};
+
+                    const recordId = document
+                        .getElementById("readRecordId")
+                        .value.trim();
+                    if (recordId) {
+                        query.record_id = recordId;
+                    } else {
+                        const uniqueId = document
+                            .getElementById("readUniqueId")
+                            .value.trim();
+                        if (uniqueId) {
+                            query.unique_id = uniqueId;
+                        } else {
+                            query.table = {
+                                name:
+                                    document.getElementById("readTableName")
+                                        .value || "test_table",
+                                access_group:
+                                    document.getElementById("readAccessGroup")
+                                        .value,
+                            };
+
+                            const indexName = document
+                                .getElementById("readIndexName")
+                                .value.trim();
+                            const indexValue = document
+                                .getElementById("readIndexValue")
+                                .value.trim();
+                            if (indexName && indexValue) {
+                                query.index = {
+                                    name: indexName,
+                                    value: isNaN(indexValue)
+                                        ? indexValue
+                                        : Number(indexValue),
+                                    condition:
+                                        document.getElementById(
+                                            "readIndexCondition"
+                                        ).value,
+                                };
+                            }
+
+                            const tag = document
+                                .getElementById("readTag")
+                                .value.trim();
+                            if (tag) query.tag = tag;
+
+                            const reference = document
+                                .getElementById("readReference")
+                                .value.trim();
+                            if (reference) query.reference = reference;
+                        }
+                    }
+
+                    const fetchOptions = {
+                        limit: Number(
+                            document.getElementById("readLimit").value
+                        ),
+                        ascending:
+                            document.getElementById("readAscending").checked,
+                        fetchMore:
+                            document.getElementById("readFetchMore").checked,
+                    };
+
+                    const result = await skapi.getRecords(query, fetchOptions);
+                    addLog("success", "📖 Records Retrieved", {
+                        count: result.list.length,
+                        endOfList: result.endOfList,
+                        records: result.list,
+                    });
+                } catch (error) {
+                    addLog("error", "❌ Read Failed", error.message);
+                }
+            }
+
+            // ==================== UPDATE ====================
+            async function loadRecordForUpdate() {
+                try {
+                    const recordId = document
+                        .getElementById("updateRecordId")
+                        .value.trim();
+                    if (!recordId) {
+                        alert("Record ID is required");
+                        return;
+                    }
+
+                    addLog(
+                        "info",
+                        "📥 Loading Record",
+                        "Fetching record data..."
+                    );
+
+                    const result = await skapi.getRecords({
+                        record_id: recordId,
+                    });
+
+                    if (!result.list || result.list.length === 0) {
+                        alert("Record not found");
+                        return;
+                    }
+
+                    const record = result.list[0];
+
+                    // Fill in the data
+                    document.getElementById("updateData").value =
+                        JSON.stringify(record.data, null, 2);
+
+                    // Fill in table info
+                    if (record.table) {
+                        document.getElementById("updateTableName").value =
+                            record.table.name || "";
+                        document.getElementById("updateAccessGroup").value =
+                            record.table.access_group || "";
+
+                        // Fill subscription options
+                        if (record.table.subscription) {
+                            document.getElementById(
+                                "updateUploadToFeed"
+                            ).checked =
+                                record.table.subscription.upload_to_feed ||
+                                false;
+                            document.getElementById(
+                                "updateNotifySubscribers"
+                            ).checked =
+                                record.table.subscription.notify_subscribers ||
+                                false;
+                            document.getElementById(
+                                "updateFeedReferencingRecords"
+                            ).checked =
+                                record.table.subscription
+                                    .feed_referencing_records || false;
+                            document.getElementById(
+                                "updateNotifyReferencingRecords"
+                            ).checked =
+                                record.table.subscription
+                                    .notify_referencing_records || false;
+                        } else {
+                            document.getElementById(
+                                "updateUploadToFeed"
+                            ).checked = false;
+                            document.getElementById(
+                                "updateNotifySubscribers"
+                            ).checked = false;
+                            document.getElementById(
+                                "updateFeedReferencingRecords"
+                            ).checked = false;
+                            document.getElementById(
+                                "updateNotifyReferencingRecords"
+                            ).checked = false;
+                        }
+                    }
+
+                    // Fill source options
+                    if (record.source) {
+                        const refLimit = record.source.referencing_limit;
+                        document.getElementById("updateSourceRefLimit").value =
+                            refLimit === null ? "0" : refLimit;
+                        document.getElementById(
+                            "updateSourcePreventMultiple"
+                        ).checked =
+                            record.source.prevent_multiple_referencing || false;
+                        document.getElementById(
+                            "updateSourceOnlyGranted"
+                        ).checked =
+                            record.source.only_granted_can_reference || false;
+                        document.getElementById(
+                            "updateSourceCanRemove"
+                        ).checked =
+                            record.source.can_remove_referencing_records ||
+                            false;
+                        document.getElementById(
+                            "updateSourceAllowGrantOthers"
+                        ).checked =
+                            record.source.allow_granted_to_grant_others ||
+                            false;
+
+                        if (record.source.referencing_index_restrictions) {
+                            document.getElementById(
+                                "updateSourceIndexRestrictions"
+                            ).value = JSON.stringify(
+                                record.source.referencing_index_restrictions,
+                                null,
+                                2
+                            );
+                        } else {
+                            document.getElementById(
+                                "updateSourceIndexRestrictions"
+                            ).value = "";
+                        }
+                    } else {
+                        document.getElementById("updateSourceRefLimit").value =
+                            "";
+                        document.getElementById(
+                            "updateSourcePreventMultiple"
+                        ).checked = false;
+                        document.getElementById(
+                            "updateSourceOnlyGranted"
+                        ).checked = false;
+                        document.getElementById(
+                            "updateSourceCanRemove"
+                        ).checked = false;
+                        document.getElementById(
+                            "updateSourceAllowGrantOthers"
+                        ).checked = false;
+                        document.getElementById(
+                            "updateSourceIndexRestrictions"
+                        ).value = "";
+                    }
+
+                    // Show loaded info
+                    const infoDiv = document.getElementById("updateRecordInfo");
+                    const infoContent = document.getElementById(
+                        "updateRecordInfoContent"
+                    );
+                    infoContent.innerHTML = `
+                        <strong>Table:</strong> ${record.table.name} (${
+                        record.table.access_group
+                    })<br>
+                        <strong>Uploaded:</strong> ${new Date(
+                            record.uploaded
+                        ).toLocaleString("ko-KR")}<br>
+                        <strong>Updated:</strong> ${new Date(
+                            record.updated
+                        ).toLocaleString("ko-KR")}
+                    `;
+                    infoDiv.style.display = "block";
+
+                    addLog("success", "✅ Record Loaded Successfully", {
+                        record_id: record.record_id,
+                        table: record.table.name,
+                        data: record.data,
+                    });
+                } catch (error) {
+                    addLog("error", "❌ Load Record Failed", error.message);
+                }
+            }
+
+            async function updateRecord() {
+                try {
+                    const recordId = document
+                        .getElementById("updateRecordId")
+                        .value.trim();
+                    if (!recordId) {
+                        alert("Record ID is required");
+                        return;
+                    }
+
+                    const dataStr = document
+                        .getElementById("updateData")
+                        .value.trim();
+
+                    if (!dataStr) {
+                        alert(
+                            'New Data is required. Cannot update with empty data.\n\nTip: Enter the data you want to update, e.g., {"name": "updated"}'
+                        );
+                        return;
+                    }
+
+                    const data = JSON.parse(dataStr);
+
+                    const config = { record_id: recordId };
+
+                    const tableName = document
+                        .getElementById("updateTableName")
+                        .value.trim();
+                    const accessGroup =
+                        document.getElementById("updateAccessGroup").value;
+
+                    // Check if any subscription options are set
+                    const uploadFeedChecked =
+                        document.getElementById("updateUploadToFeed").checked;
+                    const notifySubChecked = document.getElementById(
+                        "updateNotifySubscribers"
+                    ).checked;
+                    const feedRefChecked = document.getElementById(
+                        "updateFeedReferencingRecords"
+                    ).checked;
+                    const notifyRefChecked = document.getElementById(
+                        "updateNotifyReferencingRecords"
+                    ).checked;
+
+                    // Always create table config if we have table name or access group or subscription options
+                    if (tableName || accessGroup) {
+                        config.table = {};
+                        if (tableName) config.table.name = tableName;
+                        if (accessGroup)
+                            config.table.access_group = accessGroup;
+                    }
+
+                    // Add subscription options - include all values (true or false) when updating
+                    // This ensures unchecked boxes are also updated as false
+                    if (
+                        config.table ||
+                        uploadFeedChecked ||
+                        notifySubChecked ||
+                        feedRefChecked ||
+                        notifyRefChecked
+                    ) {
+                        if (!config.table) config.table = {};
+
+                        config.table.subscription = {
+                            upload_to_feed: uploadFeedChecked,
+                            notify_subscribers: notifySubChecked,
+                            feed_referencing_records: feedRefChecked,
+                            notify_referencing_records: notifyRefChecked,
+                        };
+                    }
+
+                    // Source options for update
+                    const sourceOptions = {};
+                    let hasSourceUpdate = false;
+
+                    const refLimit = document
+                        .getElementById("updateSourceRefLimit")
+                        .value.trim();
+                    if (refLimit !== "") {
+                        const limitNum = Number(refLimit);
+                        sourceOptions.referencing_limit =
+                            limitNum === 0 ? null : limitNum;
+                        hasSourceUpdate = true;
+                    }
+
+                    if (
+                        document.getElementById("updateSourcePreventMultiple")
+                            .checked
+                    ) {
+                        sourceOptions.prevent_multiple_referencing = true;
+                        hasSourceUpdate = true;
+                    }
+
+                    if (
+                        document.getElementById("updateSourceOnlyGranted")
+                            .checked
+                    ) {
+                        sourceOptions.only_granted_can_reference = true;
+                        hasSourceUpdate = true;
+                    }
+
+                    if (
+                        document.getElementById("updateSourceCanRemove").checked
+                    ) {
+                        sourceOptions.can_remove_referencing_records = true;
+                        hasSourceUpdate = true;
+                    }
+
+                    if (
+                        document.getElementById("updateSourceAllowGrantOthers")
+                            .checked
+                    ) {
+                        sourceOptions.allow_granted_to_grant_others = true;
+                        hasSourceUpdate = true;
+                    }
+
+                    const indexRestrictions = document
+                        .getElementById("updateSourceIndexRestrictions")
+                        .value.trim();
+                    if (indexRestrictions) {
+                        try {
+                            sourceOptions.referencing_index_restrictions =
+                                JSON.parse(indexRestrictions);
+                            hasSourceUpdate = true;
+                        } catch (e) {
+                            alert(
+                                "Invalid JSON format for referencing_index_restrictions"
+                            );
+                            return;
+                        }
+                    }
+
+                    // Only add source if at least one option is set
+                    if (hasSourceUpdate) {
+                        config.source = sourceOptions;
+                    }
+
+                    const result = await skapi.postRecord(data, config);
+                    addLog("success", "✏️ Record Updated", result);
+                } catch (error) {
+                    addLog("error", "❌ Update Failed", error.message);
+                }
+            }
+
+            // ==================== DELETE ====================
+            async function deleteRecords() {
+                try {
+                    const recordIds = document
+                        .getElementById("deleteRecordIds")
+                        .value.trim();
+
+                    let query;
+                    if (recordIds) {
+                        query = {
+                            record_id: recordIds
+                                .split(",")
+                                .map((id) => id.trim()),
+                        };
+                    } else {
+                        const tableName = document
+                            .getElementById("deleteTableName")
+                            .value.trim();
+                        const accessGroup =
+                            document.getElementById("deleteAccessGroup").value;
+
+                        if (!tableName) {
+                            alert("Please provide record IDs or table name");
+                            return;
+                        }
+
+                        query = {
+                            table: { name: tableName },
+                        };
+                        if (accessGroup) query.table.access_group = accessGroup;
+                    }
+
+                    const result = await skapi.deleteRecords(query);
+                    addLog("success", "🗑️ Records Deleted", result);
+                } catch (error) {
+                    addLog("error", "❌ Delete Failed", error.message);
+                }
+            }
+
+            // ==================== FILE ====================
+            async function uploadFile(event) {
+                event.preventDefault();
+
+                try {
+                    const form = event.target;
+                    const tableName = form.tableName.value;
+
+                    const progressDiv =
+                        document.getElementById("uploadProgress");
+                    const progressBar = document.getElementById("progressBar");
+                    const progressText =
+                        document.getElementById("progressText");
+
+                    progressDiv.style.display = "block";
+
+                    const config = {
+                        table: { name: tableName, access_group: "public" },
+                        progress: (p) => {
+                            if (p.status === "upload") {
+                                const percent = Math.round(p.progress);
+                                progressBar.style.width = percent + "%";
+                                progressText.textContent = `${percent}% - ${
+                                    p.currentFile?.name || ""
+                                }`;
+                            }
+                        },
+                    };
+
+                    const result = await skapi.postRecord(event, config);
+
+                    progressDiv.style.display = "none";
+                    addLog("success", "📁 Files Uploaded", result);
+                    form.reset();
+                } catch (error) {
+                    document.getElementById("uploadProgress").style.display =
+                        "none";
+                    addLog("error", "❌ Upload Failed", error.message);
+                }
+            }
+
+            async function downloadFile() {
+                try {
+                    const recordId = document
+                        .getElementById("downloadRecordId")
+                        .value.trim();
+                    if (!recordId) {
+                        alert("Record ID is required");
+                        return;
+                    }
+
+                    const result = await skapi.getRecords({
+                        record_id: recordId,
+                    });
+                    const record = result.list[0];
+
+                    if (!record || !record.bin) {
+                        addLog(
+                            "info",
+                            "📁 No Files",
+                            "No files found in this record"
+                        );
+                        return;
+                    }
+
+                    addLog("info", "📁 Files Found", record.bin);
+
+                    // Download first file
+                    const fileKey = Object.keys(record.bin)[0];
+                    const file = record.bin[fileKey][0];
+
+                    if (file) {
+                        file.getFile(); // Browser download
+                        addLog("success", "📥 Downloading File", file);
+                    }
+                } catch (error) {
+                    addLog("error", "❌ Download Failed", error.message);
+                }
+            }
+
+            // ==================== SUBSCRIPTION ====================
+            async function subscribe() {
+                try {
+                    const userId = document
+                        .getElementById("subscribeUserId")
+                        .value.trim();
+                    if (!userId) {
+                        alert("User ID is required");
+                        return;
+                    }
+
+                    const result = await skapi.subscribe({
+                        user_id: userId,
+                        get_feed: true, // Required to enable getFeed() method
+                    });
+                    addLog("success", "📰 Subscribed", result);
+                } catch (error) {
+                    addLog("error", "❌ Subscribe Failed", error.message);
+                }
+            }
+
+            async function unsubscribe() {
+                try {
+                    const userId = document
+                        .getElementById("subscribeUserId")
+                        .value.trim();
+                    if (!userId) {
+                        alert("User ID is required");
+                        return;
+                    }
+
+                    const result = await skapi.unsubscribe({
+                        user_id: userId,
+                    });
+                    addLog("success", "📰 Unsubscribed", result);
+                } catch (error) {
+                    addLog("error", "❌ Unsubscribe Failed", error.message);
+                }
+            }
+
+            async function blockSubscriber() {
+                try {
+                    const userId = document
+                        .getElementById("blockUserId")
+                        .value.trim();
+                    if (!userId) {
+                        alert("User ID is required");
+                        return;
+                    }
+
+                    const result = await skapi.blockSubscriber({
+                        user_id: userId,
+                    });
+                    addLog("success", "🚫 Subscriber Blocked", result);
+                } catch (error) {
+                    addLog("error", "❌ Block Failed", error.message);
+                }
+            }
+
+            async function unblockSubscriber() {
+                try {
+                    const userId = document
+                        .getElementById("blockUserId")
+                        .value.trim();
+                    if (!userId) {
+                        alert("User ID is required");
+                        return;
+                    }
+
+                    const result = await skapi.unblockSubscriber({
+                        user_id: userId,
+                    });
+                    addLog("success", "✅ Subscriber Unblocked", result);
+                } catch (error) {
+                    addLog("error", "❌ Unblock Failed", error.message);
+                }
+            }
+
+            async function getSubscriptions() {
+                try {
+                    const result = await skapi.getSubscriptions({
+                        subscriber: skapi.user.user_id,
+                    });
+                    addLog("success", "📰 My Subscriptions", {
+                        count: result.list?.length || 0,
+                        subscriptions: result,
+                    });
+                } catch (error) {
+                    addLog(
+                        "error",
+                        "❌ Get Subscriptions Failed",
+                        error.message
+                    );
+                }
+            }
+
+            async function getFeed() {
+                try {
+                    // Check if skapi is defined
+                    if (typeof skapi === "undefined") {
+                        addLog(
+                            "error",
+                            "❌ Skapi Not Loaded",
+                            "skapi is not defined. Please reload the page."
+                        );
+                        alert("Skapi is not loaded. Please reload the page.");
+                        return;
+                    }
+
+                    const accessGroup =
+                        document.getElementById("feedAccessGroup").value;
+
+                    // Prepare params object (first parameter)
+                    const params = {};
+                    if (accessGroup !== "") {
+                        params.access_group = Number(accessGroup);
+                    }
+
+                    // Prepare fetchOptions (second parameter)
+                    const fetchOptions = {
+                        limit: Number(
+                            document.getElementById("feedLimit").value || 50
+                        ),
+                        fetchMore:
+                            document.getElementById("feedFetchMore").checked,
+                    };
+
+                    // Call getFeed with params and fetchOptions
+                    const result = await skapi.getFeed(
+                        Object.keys(params).length > 0 ? params : undefined,
+                        fetchOptions
+                    );
+
+                    addLog("success", "📰 My Feed", {
+                        params:
+                            Object.keys(params).length > 0
+                                ? params
+                                : "(no params)",
+                        count: result.list.length,
+                        endOfList: result.endOfList,
+                        feeds: result.list,
+                    });
+                } catch (error) {
+                    addLog("error", "❌ Get Feed Failed", error.message);
+                }
+            }
+
+            // ==================== DEBUG FUNCTIONS ====================
+            async function debugSubscription() {
+                try {
+                    addLog(
+                        "info",
+                        "🔍 Debug: Checking Subscription Status",
+                        "Starting debug..."
+                    );
+
+                    // 1. Check current user
+                    const currentUser = skapi.user;
+                    addLog("info", "👤 Current User", {
+                        user_id: currentUser.user_id,
+                        email: currentUser.email,
+                    });
+
+                    // 2. Check subscriptions
+                    const subscriptions = await skapi.getSubscriptions({
+                        subscriber: currentUser.user_id,
+                    });
+                    addLog("info", "📋 My Subscriptions", {
+                        count: subscriptions.list?.length || 0,
+                        list: subscriptions.list || [],
+                    });
+
+                    // 3. Check if user is subscribed to anyone
+                    if (subscriptions.list && subscriptions.list.length > 0) {
+                        addLog(
+                            "success",
+                            "✅ You are subscribed to users",
+                            subscriptions.list
+                        );
+                    } else {
+                        addLog(
+                            "info",
+                            "ℹ️ You are not subscribed to anyone",
+                            "Subscribe to a user first!"
+                        );
+                    }
+                } catch (error) {
+                    addLog("error", "❌ Debug Failed", error.message);
+                }
+            }
+
+            async function debugFeedRecords() {
+                try {
+                    addLog(
+                        "info",
+                        "🔍 Debug: Checking Feed Records",
+                        "Searching for subscription records..."
+                    );
+
+                    // Check all public subscription records
+                    const query = {
+                        table: {
+                            name: "feed",
+                            access_group: "public",
+                            subscription: true,
+                        },
+                    };
+
+                    const result = await skapi.getRecords(query, {
+                        limit: 100,
+                    });
+
+                    addLog("info", "📊 Feed Table Records", {
+                        count: result.list.length,
+                        records: result.list.map((r) => ({
+                            record_id: r.record_id,
+                            user_id: r.user_id,
+                            uploaded: new Date(r.uploaded).toLocaleString(
+                                "ko-KR"
+                            ),
+                            subscription: r.table.subscription,
+                            data: r.data,
+                        })),
+                    });
+
+                    if (result.list.length === 0) {
+                        addLog(
+                            "info",
+                            "ℹ️ No subscription records found",
+                            "Create a record with 'Is Subscription Record' and 'Upload to Feed' checked"
+                        );
+                    }
+                } catch (error) {
+                    addLog(
+                        "error",
+                        "❌ Debug Feed Records Failed",
+                        error.message
+                    );
+                }
+            }
+
+            // ==================== ACCESS ====================
+            async function grantPrivateAccess() {
+                try {
+                    const recordId = document
+                        .getElementById("accessRecordId")
+                        .value.trim();
+                    const userId = document
+                        .getElementById("accessUserId")
+                        .value.trim();
+
+                    if (!recordId || !userId) {
+                        alert("Both Record ID and User ID are required");
+                        return;
+                    }
+
+                    const result = await skapi.grantPrivateRecordAccess({
+                        record_id: recordId,
+                        user_id: userId,
+                    });
+                    addLog("success", "🔐 Private Access Granted", result);
+                } catch (error) {
+                    addLog("error", "❌ Grant Failed", error.message);
+                }
+            }
+
+            async function removePrivateAccess() {
+                try {
+                    const recordId = document
+                        .getElementById("accessRecordId")
+                        .value.trim();
+                    const userId = document
+                        .getElementById("accessUserId")
+                        .value.trim();
+
+                    if (!recordId || !userId) {
+                        alert("Both Record ID and User ID are required");
+                        return;
+                    }
+
+                    const result = await skapi.removePrivateRecordAccess({
+                        record_id: recordId,
+                        user_id: userId,
+                    });
+                    addLog("success", "🔐 Private Access Removed", result);
+                } catch (error) {
+                    addLog("error", "❌ Remove Failed", error.message);
+                }
+            }
+
+            async function listPrivateAccess() {
+                try {
+                    const recordId = document
+                        .getElementById("accessRecordId")
+                        .value.trim();
+                    const userId = document
+                        .getElementById("accessUserId")
+                        .value.trim();
+
+                    if (!recordId && !userId) {
+                        alert("At least Record ID or User ID is required");
+                        return;
+                    }
+
+                    const params = {};
+                    if (recordId) params.record_id = recordId;
+                    if (userId) params.user_id = userId;
+
+                    const result = await skapi.listPrivateRecordAccess(params);
+                    addLog("success", "🔐 Private Access List", result);
+                } catch (error) {
+                    addLog("error", "❌ List Failed", error.message);
+                }
+            }
+
+            // ==================== INFO ====================
+            async function getTables() {
+                try {
+                    const result = await skapi.getTables();
+                    addLog("success", "📊 Tables", result);
+                } catch (error) {
+                    addLog("error", "❌ Get Tables Failed", error.message);
+                }
+            }
+
+            async function getIndexes() {
+                try {
+                    const result = await skapi.getIndexes();
+                    addLog("success", "📊 Indexes", result);
+                } catch (error) {
+                    addLog("error", "❌ Get Indexes Failed", error.message);
+                }
+            }
+
+            async function getTags() {
+                try {
+                    const result = await skapi.getTags();
+                    addLog("success", "📊 Tags", result);
+                } catch (error) {
+                    addLog("error", "❌ Get Tags Failed", error.message);
+                }
+            }
+
+            async function getUniqueIds() {
+                try {
+                    const prefix = document
+                        .getElementById("uniqueIdPrefix")
+                        .value.trim();
+                    const params = prefix
+                        ? {
+                              unique_id: prefix,
+                              condition: ">=",
+                          }
+                        : {};
+
+                    const result = await skapi.getUniqueId(params);
+                    addLog("success", "🆔 Unique IDs", result);
+                } catch (error) {
+                    addLog("error", "❌ Get Unique IDs Failed", error.message);
+                }
+            }
+
+            async function getIndexInfo() {
+                try {
+                    const tableName = document
+                        .getElementById("indexTableName")
+                        .value.trim();
+                    const indexName = document
+                        .getElementById("indexName")
+                        .value.trim();
+
+                    if (!tableName) {
+                        alert("Table name is required");
+                        return;
+                    }
+
+                    const params = { table: tableName };
+                    if (indexName) params.index = indexName;
+
+                    const result = await skapi.getIndexes(params);
+                    addLog("success", "📊 Index Information", result);
+                } catch (error) {
+                    addLog("error", "❌ Get Index Info Failed", error.message);
+                }
+            }
+        </script>
+    </body>
+</html>

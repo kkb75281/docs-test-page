@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>로그인 페이지</title>
+    </head>
+    <link rel="stylesheet" href="style.css" />
+    <body>
+        <a class="btn home" href="index.html">홈으로</a>
+        <p id="loggedUser"></p>
+        <h1>로그인</h1>
+        <form class="form" action="index.html" onsubmit="handleLogin(event)">
+            <label>
+                이메일
+                <br />
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    required
+                />
+            </label>
+            <label>
+                비밀번호
+                <br />
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="비밀번호를 입력하세요"
+                    required
+                />
+            </label>
+            <input type="submit" value="로그인" />
+            <a href="forgot-password.html">비밀번호를 잊으셨나요?</a>
+        </form>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+    <script src="service.js"></script>
+    <script>
+        function handleLogin(event) {
+            skapi
+                .login(event)
+                .then((u) => {
+                    console.log("Successfully logged in.");
+                    // Login successful - form will redirect to index.html
+                })
+                .catch((err) => {
+                    console.log("Login error:", err.code);
+
+                    if (err.code === "SIGNUP_CONFIRMATION_NEEDED") {
+                        if (
+                            confirm(
+                                "Your signup confirmation is required. Resend confirmation email?"
+                            )
+                        ) {
+                            skapi.resendSignupConfirmation().then((res) => {
+                                console.log(res); // 'SUCCESS: Signup confirmation e-mail has been sent.'
+                                alert(res);
+                            });
+                        }
+                    } else if (err.code === "USER_IS_DISABLED") {
+                        // 계정이 비활성화된 경우 복구 옵션 제공
+                        const recover = confirm(
+                            "계정이 비활성화되었습니다.\n\n복구하시겠습니까?\n\n✅ 확인: 복구 이메일 전송\n❌ 취소: 로그인 취소\n\n⚠️ 복구하려면 이메일 인증이 되어있어야 합니다."
+                        );
+
+                        if (recover) {
+                            // 복구 성공 시 /welcome 페이지로 리다이렉트 (선택사항)
+                            skapi
+                                .recoverAccount("/index.html")
+                                .then((res) => {
+                                    console.log(res); // SUCCESS: Recovery e-mail has been sent.
+                                    alert(
+                                        "복구 이메일이 전송되었습니다!\n\n이메일의 링크를 클릭하면 계정이 복구됩니다.\n복구 후 자동으로 홈페이지로 이동합니다."
+                                    );
+                                })
+                                .catch((recoverErr) => {
+                                    console.error(
+                                        "Account recovery failed:",
+                                        recoverErr
+                                    );
+                                    alert(
+                                        "계정 복구 실패: " + recoverErr.message
+                                    );
+                                });
+                        }
+                    } else {
+                        // 다른 에러 처리
+                        alert("로그인 실패: " + err.message);
+                        throw err;
+                    }
+                });
+        }
+    </script>
+</html>

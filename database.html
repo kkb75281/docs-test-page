@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>데이터베이스 관리</title>
+    </head>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        .group-checkbox {
+            display: flex;
+            flex-direction: column;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .group-checkbox label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .group-checkbox input {
+            margin: 3px 10px 3px 0;
+            margin: 0;
+        }
+    </style>
+    <body>
+        <a class="btn home" href="index.html">홈으로</a>
+        <p id="loggedUser"></p>
+
+        <br />
+        <br />
+
+        <h3>Creating a Record</h3>
+        <input name="record_id" placeholder="Record ID (for update only)" />
+        <input name="table_name" placeholder="Table Name" />
+        <select
+            name="access_group_select"
+            id="access_group_select"
+            onchange="toggleAccessGroupInput()"
+        >
+            <option value="public">Public</option>
+            <option value="authorized">Authorized</option>
+            <option value="private">Private</option>
+            <option value="admin">Admin</option>
+        </select>
+        <input
+            type="number"
+            name="access_group"
+            id="access_group"
+            placeholder="1 ~ 99"
+            min="1"
+            max="99"
+            style="display: none"
+        />
+        <input name="unique_id" placeholder="Unique ID (optional)" />
+        <textarea name="json_data" placeholder="JSON data"></textarea>
+
+        <div class="checkbox-input">
+            <input type="checkbox" name="readonly" />
+            Readonly (cannot be updated after creation)
+        </div>
+
+        <div class="group-checkbox">
+            <label>Index (optional):</label>
+            <input type="text" name="index_name" placeholder="Index Name" />
+            <input type="text" name="index_value" placeholder="Index Value" />
+        </div>
+
+        <input
+            type="text"
+            name="tags"
+            placeholder="Tags (comma separated, optional)"
+        />
+        <input
+            type="text"
+            name="reference"
+            placeholder="Reference (Record ID or Unique ID, optional)"
+        />
+
+        <div class="group-checkbox">
+            <label>Subscription Options:</label>
+            <div class="checkbox-input">
+                <input type="checkbox" name="upload_to_feed" />
+                upload_to_feed
+            </div>
+            <div class="checkbox-input">
+                <input type="checkbox" name="notify_subscribers" />
+                notify_subscribers
+            </div>
+            <div class="checkbox-input">
+                <input type="checkbox" name="feed_referencing_records" />
+                feed_referencing_records
+            </div>
+            <div class="checkbox-input">
+                <input type="checkbox" name="notify_referencing_records" />
+                notify_referencing_records
+            </div>
+        </div>
+
+        <div class="group-checkbox">
+            <label>Source Options:</label>
+            <input
+                type="number"
+                name="referencing_limit"
+                placeholder="Referencing Limit (leave empty for infinite)"
+            />
+            <div class="checkbox-input">
+                <input type="checkbox" name="prevent_multiple_referencing" />
+                prevent_multiple_referencing
+            </div>
+            <div class="checkbox-input">
+                <input type="checkbox" name="only_granted_can_reference" />
+                only_granted_can_reference
+            </div>
+            <div class="checkbox-input">
+                <input type="checkbox" name="can_remove_referencing_records" />
+                can_remove_referencing_records
+            </div>
+            <div class="checkbox-input">
+                <input type="checkbox" name="allow_granted_to_grant_others" />
+                allow_granted_to_grant_others
+            </div>
+        </div>
+
+        <button type="button" onclick="createDatabase()">Upload</button>
+
+        <br />
+        <br />
+        <br />
+        <br />
+
+        <h3>File Upload</h3>
+        <input type="file" id="fileInput" />
+        <select
+            name="access_group"
+            id="file_access_group"
+            onchange="toggleFileAccessGroupInput()"
+        >
+            <option value="public">Public</option>
+            <option value="authorized">Authorized</option>
+            <option value="private">Private</option>
+        </select>
+        <input
+            type="number"
+            name="file_access_group_number"
+            id="file_access_group_number"
+            placeholder="1 ~ 99"
+            min="1"
+            max="99"
+            style="display: none"
+        />
+        <button type="button" onclick="uploadFile()">Upload</button>
+
+        <br />
+        <br />
+        <br />
+        <br />
+
+        <h3>Fetching a Record</h3>
+        <label for="get_table_name">Table Name</label>
+        <input type="text" name="get_table_name" placeholder="Table Name" />
+        <label for="get_access_group">Access Group</label>
+        <select
+            name="get_access_group"
+            id="get_access_group"
+            onchange="toggleGetAccessGroupInput()"
+        >
+            <option value="public">Public</option>
+            <option value="authorized">Authorized</option>
+            <option value="private">Private</option>
+        </select>
+        <input type="text" name="get_unique_id" placeholder="Unique ID" />
+        <input
+            type="number"
+            name="get_access_group_number"
+            id="get_access_group_number"
+            placeholder="1 ~ 99"
+            min="1"
+            max="99"
+            style="display: none"
+        />
+        <button type="button" onclick="getDatabase()">Get</button>
+
+        <br />
+        <br />
+        <br />
+        <br />
+
+        <h3>Fetching Unique ID List</h3>
+        <input
+            type="text"
+            name="fetch_unique_id"
+            placeholder="Unique ID (optional)"
+        />
+        <select name="condition" id="condition_select">
+            <option value="">No Condition</option>
+            <option value="gt">Greater Than (>)</option>
+            <option value="gte">Greater Than or Equal (>=)</option>
+            <option value="lt">Less Than (<)</option>
+            <option value="lte">Less Than or Equal (<=)</option>
+            <option value="eq">Equal (=)</option>
+        </select>
+        <button type="button" onclick="fetchUniqueIdList()">
+            Fetch Unique IDs
+        </button>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+    <script src="service.js"></script>
+    <script>
+        function toggleAccessGroupInput() {
+            const select = document.getElementById("access_group_select");
+            const input = document.getElementById("access_group");
+
+            if (select.value === "authorized") {
+                input.style.display = "block";
+            } else {
+                input.style.display = "none";
+            }
+        }
+
+        function toggleFileAccessGroupInput() {
+            const select = document.getElementById("file_access_group");
+            const input = document.getElementById("file_access_group_number");
+
+            if (select.value === "authorized") {
+                input.style.display = "block";
+            } else {
+                input.style.display = "none";
+            }
+        }
+
+        function toggleGetAccessGroupInput() {
+            const select = document.getElementById("get_access_group");
+            const input = document.getElementById("get_access_group_number");
+
+            if (select.value === "authorized") {
+                input.style.display = "block";
+            } else {
+                input.style.display = "none";
+            }
+        }
+
+        function createDatabase() {
+            const recordId = document.querySelector(
+                'input[name="record_id"]'
+            ).value;
+            const tableName = document.querySelector(
+                'input[name="table_name"]'
+            ).value;
+
+            if (!tableName && !recordId) {
+                alert("Please enter a table name or record ID.");
+                return;
+            }
+
+            let jsonData = document.querySelector(
+                'textarea[name="json_data"]'
+            ).value;
+            let data = null;
+
+            if (jsonData) {
+                // 작은따옴표를 큰따옴표로 변환 (JSON 표준 형식으로)
+                jsonData = jsonData.replace(/'/g, '"');
+
+                // JSON 데이터인지 확인
+                try {
+                    data = JSON.parse(jsonData);
+                } catch (e) {
+                    alert(
+                        "Invalid JSON data. Please correct it.\nError: " +
+                            e.message
+                    );
+                    return;
+                }
+
+                // 객체 하나만 입력한 경우는 그대로 사용
+                // 배열인 경우도 그대로 사용
+            }
+
+            // Access Group 설정
+            let accessGroupSelect = document.getElementById(
+                "access_group_select"
+            );
+            let accessGroupValue;
+
+            if (accessGroupSelect.value === "authorized") {
+                accessGroupValue = parseInt(
+                    document.querySelector('input[name="access_group"]').value
+                );
+            } else {
+                accessGroupValue = accessGroupSelect.value;
+            }
+
+            // Config 객체 구성
+            let config = {};
+
+            // record_id (업데이트용)
+            if (recordId) {
+                config.record_id = recordId;
+            }
+
+            // table
+            if (tableName) {
+                config.table = {
+                    name: tableName,
+                    access_group: accessGroupValue,
+                };
+
+                // Subscription 설정
+                const uploadToFeed = document.querySelector(
+                    'input[name="upload_to_feed"]'
+                ).checked;
+                const notifySubscribers = document.querySelector(
+                    'input[name="notify_subscribers"]'
+                ).checked;
+                const feedReferencingRecords = document.querySelector(
+                    'input[name="feed_referencing_records"]'
+                ).checked;
+                const notifyReferencingRecords = document.querySelector(
+                    'input[name="notify_referencing_records"]'
+                ).checked;
+
+                if (
+                    uploadToFeed ||
+                    notifySubscribers ||
+                    feedReferencingRecords ||
+                    notifyReferencingRecords
+                ) {
+                    config.table.subscription = {};
+                    if (uploadToFeed)
+                        config.table.subscription.upload_to_feed = true;
+                    if (notifySubscribers)
+                        config.table.subscription.notify_subscribers = true;
+                    if (feedReferencingRecords)
+                        config.table.subscription.feed_referencing_records = true;
+                    if (notifyReferencingRecords)
+                        config.table.subscription.notify_referencing_records = true;
+                }
+            }
+
+            // unique_id
+            const uniqueId = document.querySelector(
+                'input[name="unique_id"]'
+            ).value;
+            if (uniqueId) {
+                config.unique_id = uniqueId;
+            }
+
+            // readonly
+            const readonly = document.querySelector(
+                'input[name="readonly"]'
+            ).checked;
+            if (readonly) {
+                config.readonly = true;
+            }
+
+            // index
+            const indexName = document.querySelector(
+                'input[name="index_name"]'
+            ).value;
+            const indexValue = document.querySelector(
+                'input[name="index_value"]'
+            ).value;
+            if (indexName && indexValue) {
+                config.index = {
+                    name: indexName,
+                    value: indexValue,
+                };
+            }
+
+            // tags
+            const tags = document.querySelector('input[name="tags"]').value;
+            if (tags) {
+                config.tags = tags;
+            }
+
+            // reference
+            const reference = document.querySelector(
+                'input[name="reference"]'
+            ).value;
+            if (reference) {
+                config.reference = reference;
+            }
+
+            // source options
+            const referencingLimit = document.querySelector(
+                'input[name="referencing_limit"]'
+            ).value;
+            const preventMultipleReferencing = document.querySelector(
+                'input[name="prevent_multiple_referencing"]'
+            ).checked;
+            const onlyGrantedCanReference = document.querySelector(
+                'input[name="only_granted_can_reference"]'
+            ).checked;
+            const canRemoveReferencingRecords = document.querySelector(
+                'input[name="can_remove_referencing_records"]'
+            ).checked;
+            const allowGrantedToGrantOthers = document.querySelector(
+                'input[name="allow_granted_to_grant_others"]'
+            ).checked;
+
+            if (
+                referencingLimit ||
+                preventMultipleReferencing ||
+                onlyGrantedCanReference ||
+                canRemoveReferencingRecords ||
+                allowGrantedToGrantOthers
+            ) {
+                config.source = {};
+                if (referencingLimit)
+                    config.source.referencing_limit =
+                        parseInt(referencingLimit);
+                if (preventMultipleReferencing)
+                    config.source.prevent_multiple_referencing = true;
+                if (onlyGrantedCanReference)
+                    config.source.only_granted_can_reference = true;
+                if (canRemoveReferencingRecords)
+                    config.source.can_remove_referencing_records = true;
+                if (allowGrantedToGrantOthers)
+                    config.source.allow_granted_to_grant_others = true;
+            }
+
+            console.log("Data:", data);
+            console.log("Config:", config);
+
+            skapi
+                .postRecord(data, config)
+                .then((rec) => {
+                    alert("Record created/updated successfully!");
+                    console.log(rec);
+
+                    // 폼 초기화
+                    document.querySelector('input[name="record_id"]').value =
+                        "";
+                    document.querySelector('input[name="table_name"]').value =
+                        "";
+                    document.querySelector('input[name="unique_id"]').value =
+                        "";
+                    document.querySelector('textarea[name="json_data"]').value =
+                        "";
+                    document.querySelector('input[name="access_group"]').value =
+                        "";
+                    document.querySelector(
+                        'input[name="readonly"]'
+                    ).checked = false;
+                    document.querySelector('input[name="index_name"]').value =
+                        "";
+                    document.querySelector('input[name="index_value"]').value =
+                        "";
+                    document.querySelector('input[name="tags"]').value = "";
+                    document.querySelector('input[name="reference"]').value =
+                        "";
+                    document.querySelector(
+                        'input[name="referencing_limit"]'
+                    ).value = "";
+                    document.querySelector(
+                        'input[name="upload_to_feed"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="notify_subscribers"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="feed_referencing_records"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="notify_referencing_records"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="prevent_multiple_referencing"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="only_granted_can_reference"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="can_remove_referencing_records"]'
+                    ).checked = false;
+                    document.querySelector(
+                        'input[name="allow_granted_to_grant_others"]'
+                    ).checked = false;
+                    document.getElementById("access_group_select").value =
+                        "public";
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert("Failed to create/update record: " + err.message);
+                });
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file to upload.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            let fileAccessGroupSelect =
+                document.getElementById("file_access_group");
+            let fileAccessGroupValue;
+
+            if (fileAccessGroupSelect.value === "authorized") {
+                fileAccessGroupValue = parseInt(
+                    document.getElementById("file_access_group_number").value
+                );
+            } else {
+                fileAccessGroupValue = fileAccessGroupSelect.value;
+            }
+
+            skapi
+                .postRecord(formData, {
+                    table: {
+                        name: "file",
+                        access_group: fileAccessGroupValue,
+                    },
+                })
+                .then((response) => {
+                    alert("File uploaded successfully!");
+                    console.log(response);
+                    fileInput.value = "";
+                    document.getElementById("file_access_group_number").value =
+                        "";
+                    fileAccessGroupSelect.value = "public";
+                    document.getElementById(
+                        "file_access_group_number"
+                    ).style.display = "none";
+                })
+                .catch((error) => {
+                    console.error("Error uploading file:", error);
+                    alert("Failed to upload file: " + error.message);
+                });
+        }
+
+        function getDatabase() {
+            const tableName = document.querySelector(
+                'input[name="get_table_name"]'
+            ).value;
+
+            const uniqueId = document.querySelector(
+                'input[name="get_unique_id"]'
+            ).value;
+
+            if (!tableName && !uniqueId) {
+                alert("Please enter a table name or unique ID.");
+                return;
+            }
+
+            let config;
+            let getAccessGroupSelect =
+                document.getElementById("get_access_group");
+            let getAccessGroupValue;
+
+            if (getAccessGroupSelect.value === "authorized") {
+                getAccessGroupValue = parseInt(
+                    document.getElementById("get_access_group_number").value
+                );
+            } else {
+                getAccessGroupValue = getAccessGroupSelect.value;
+            }
+
+            if (tableName) {
+                config = {
+                    table: {
+                        name: tableName,
+                        access_group: getAccessGroupValue,
+                    },
+                };
+            } else {
+                config = {
+                    unique_id: uniqueId,
+                };
+            }
+
+            skapi
+                .getRecords(config)
+                .then((r) => {
+                    console.log(r.list);
+                    alert(
+                        "Database retrieved successfully! Check console for details."
+                    );
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert("Failed to retrieve database: " + err.message);
+                });
+        }
+
+        function fetchUniqueIdList() {
+            const uniqueId = document.querySelector(
+                'input[name="fetch_unique_id"]'
+            ).value;
+            const condition = document.getElementById("condition_select").value;
+
+            let query = {};
+
+            // unique_id가 입력된 경우에만 query에 추가
+            if (uniqueId) {
+                query.unique_id = uniqueId;
+            }
+
+            // condition이 선택된 경우에만 query에 추가
+            if (condition) {
+                query.condition = condition;
+            }
+
+            // query가 비어있으면 모든 unique ID 가져오기
+            const finalQuery =
+                Object.keys(query).length > 0 ? query : undefined;
+
+            skapi
+                .getUniqueId(finalQuery)
+                .then((result) => {
+                    console.log("Unique ID List:", result);
+                    alert(
+                        `Unique IDs fetched successfully! Found ${result.list.length} items. Check console for details.`
+                    );
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert("Failed to fetch unique IDs: " + err.message);
+                });
+        }
+    </script>
+</html>

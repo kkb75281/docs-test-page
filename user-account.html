@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Skapi User Account Test</title>
+        <link rel="stylesheet" href="style.css" />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-top: 20px;
+            }
+            .panel {
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 20px;
+                background-color: #f9f9f9;
+            }
+            .panel h2 {
+                margin-top: 0;
+                border-bottom: 2px solid #007bff;
+                padding-bottom: 10px;
+            }
+            .panel h3 {
+                margin-top: 15px;
+                color: #007bff;
+                font-size: 16px;
+            }
+            #resultLog {
+                height: 500px;
+                overflow-y: auto;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 10px;
+                font-family: monospace;
+                font-size: 12px;
+            }
+            .result-item {
+                margin-bottom: 10px;
+                padding: 8px;
+                border-radius: 4px;
+                border-left: 3px solid #ccc;
+            }
+            .result-item.success {
+                background-color: #d4edda;
+                border-left-color: #28a745;
+            }
+            .result-item.error {
+                background-color: #f8d7da;
+                border-left-color: #dc3545;
+            }
+            .result-item.info {
+                background-color: #d1ecf1;
+                border-left-color: #17a2b8;
+            }
+            button {
+                padding: 8px 16px;
+                margin: 5px 5px 5px 0;
+                border: none;
+                border-radius: 4px;
+                background-color: #007bff;
+                color: white;
+                font-size: 14px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #0056b3;
+            }
+            button.success {
+                background-color: #28a745;
+            }
+            button.success:hover {
+                background-color: #218838;
+            }
+            button.danger {
+                background-color: #dc3545;
+            }
+            button.danger:hover {
+                background-color: #c82333;
+            }
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            textarea {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+            .form-group {
+                margin-bottom: 15px;
+            }
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+                font-size: 13px;
+            }
+            .user-info {
+                background-color: #e9ecef;
+                padding: 10px;
+                border-radius: 4px;
+                margin-bottom: 15px;
+                font-size: 14px;
+            }
+            .tabs {
+                display: flex;
+                border-bottom: 2px solid #ddd;
+                margin-bottom: 15px;
+            }
+            .tab {
+                padding: 10px 20px;
+                cursor: pointer;
+                border: none;
+                background: none;
+                font-size: 14px;
+                font-weight: bold;
+                color: #666;
+                margin: 0;
+                border-radius: 0;
+            }
+            .tab.active {
+                color: #007bff;
+                border-bottom: 2px solid #007bff;
+            }
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <a class="btn home" href="index.html">홈으로</a>
+        <h1>👤 Skapi User Account Test</h1>
+
+        <div class="user-info">
+            <strong>Logged User:</strong>
+            <span id="loggedUser">Not logged in</span>
+        </div>
+
+        <!-- Test Guide Panel -->
+        <div
+            class="panel"
+            style="background-color: #fff3cd; border-color: #ffc107"
+        >
+            <h2>📋 테스트 가이드</h2>
+
+            <details open>
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    📧 E-Mail Verification 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>인증 코드 전송</strong>
+                        <ul>
+                            <li>
+                                로그인된 상태에서 "Email Verification" 탭 이동
+                            </li>
+                            <li>"Send Verification Code" 버튼 클릭</li>
+                            <li>✅ 이메일 수신함에서 인증 코드 확인</li>
+                            <li>⏱️ 코드는 일정 시간 후 만료됨</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>이메일 인증 완료</strong>
+                        <ul>
+                            <li>
+                                Verification Code 입력란에 이메일에서 받은 코드
+                                입력
+                            </li>
+                            <li>"Verify Email" 버튼 클릭</li>
+                            <li>✅ 인증 성공 메시지 확인</li>
+                            <li>
+                                "Get My Profile" →
+                                <code>email_verified</code> 확인
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div
+                    style="
+                        background-color: #fff3cd;
+                        border: 1px solid #ffc107;
+                        border-radius: 4px;
+                        padding: 10px;
+                        margin-top: 10px;
+                    "
+                >
+                    <strong>💡 인증된 이메일의 혜택:</strong>
+                    <ul style="margin: 5px 0">
+                        <li>비밀번호 분실 시 재설정 가능</li>
+                        <li>서비스 뉴스레터 수신 가능</li>
+                        <li>비활성화된 계정 복구 가능</li>
+                        <li>다른 사용자에게 이메일 공개 선택 가능</li>
+                    </ul>
+                </div>
+
+                <div
+                    style="
+                        background-color: #f8d7da;
+                        border: 1px solid #dc3545;
+                        border-radius: 4px;
+                        padding: 10px;
+                        margin-top: 10px;
+                    "
+                >
+                    <strong>⚠️ 주의사항:</strong>
+                    <ul style="margin: 5px 0">
+                        <li>이메일 주소 변경 시 인증 상태가 초기화됨</li>
+                        <li>
+                            Signup confirmation이 활성화된 경우 가입 시 자동
+                            인증됨
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🔐 Change Password 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>비밀번호 변경</strong>
+                        <ul>
+                            <li>"Change Password" 탭 이동</li>
+                            <li>Current Password 입력</li>
+                            <li>New Password 입력 (최소 6자)</li>
+                            <li>"Change Password" 클릭</li>
+                            <li>✅ 변경 성공 메시지 확인</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>변경된 비밀번호로 재로그인</strong>
+                        <ul>
+                            <li>로그아웃 후 새 비밀번호로 로그인</li>
+                            <li>✅ 로그인 성공 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    👤 Update Profile 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>프로필 정보 업데이트</strong>
+                        <ul>
+                            <li>"Update Profile" 탭 이동</li>
+                            <li>Name, Email, Gender 등 정보 입력</li>
+                            <li>Profile Picture 선택 (선택사항)</li>
+                            <li>"Update Profile" 클릭</li>
+                            <li>✅ 업데이트 성공 메시지 확인</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>프로필 확인</strong>
+                        <ul>
+                            <li>"Get My Profile" 버튼 클릭</li>
+                            <li>✅ 변경된 정보 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    "
+                >
+                    🗑️ Disable/Recover Account 테스트
+                </summary>
+                <ol style="line-height: 1.8">
+                    <li>
+                        <strong>계정 비활성화</strong>
+                        <ul>
+                            <li>
+                                ⚠️ <strong>주의:</strong> 테스트 계정으로만 진행
+                            </li>
+                            <li>"Disable/Recover" 탭 이동</li>
+                            <li>"Disable My Account" 클릭</li>
+                            <li>✅ 계정 비활성화됨 (자동 로그아웃)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>계정 복구</strong>
+                        <ul>
+                            <li>
+                                로그인 페이지에서 비활성화된 계정으로 로그인
+                                시도
+                            </li>
+                            <li>"이메일 인증된 계정"인 경우 복구 가능</li>
+                            <li>복구 코드 이메일 수신</li>
+                            <li>코드 입력하여 계정 복구</li>
+                        </ul>
+                    </li>
+                </ol>
+            </details>
+        </div>
+
+        <div class="container">
+            <!-- Left Panel: Account Operations -->
+            <div class="panel">
+                <h2>⚙️ Account Operations</h2>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('email')">
+                        Email Verification
+                    </button>
+                    <button class="tab" onclick="switchTab('password')">
+                        Change Password
+                    </button>
+                    <button class="tab" onclick="switchTab('profile')">
+                        Update Profile
+                    </button>
+                    <button class="tab" onclick="switchTab('disable')">
+                        Disable/Recover
+                    </button>
+                </div>
+
+                <!-- EMAIL VERIFICATION TAB -->
+                <div id="tab-email" class="tab-content active">
+                    <h3>📧 Email Verification</h3>
+
+                    <div
+                        style="
+                            background-color: #d1ecf1;
+                            padding: 10px;
+                            border-radius: 4px;
+                            margin-bottom: 15px;
+                            font-size: 13px;
+                        "
+                    >
+                        💡 <strong>Tip:</strong> 인증 코드를 먼저 이메일로 받은
+                        후, 코드를 입력하여 인증을 완료하세요.
+                    </div>
+
+                    <div class="form-group">
+                        <button
+                            onclick="sendVerificationCode()"
+                            class="success"
+                        >
+                            📤 Send Verification Code
+                        </button>
+                    </div>
+
+                    <hr />
+
+                    <div class="form-group">
+                        <label>Verification Code:</label>
+                        <input
+                            type="text"
+                            id="verificationCode"
+                            placeholder="이메일에서 받은 인증 코드 입력"
+                        />
+                    </div>
+
+                    <button onclick="verifyEmailWithCode()">
+                        ✅ Verify Email
+                    </button>
+                </div>
+
+                <!-- CHANGE PASSWORD TAB -->
+                <div id="tab-password" class="tab-content">
+                    <h3>🔐 Change Password</h3>
+
+                    <div class="form-group">
+                        <label>Current Password:</label>
+                        <input
+                            type="password"
+                            id="currentPassword"
+                            placeholder="현재 비밀번호"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label>New Password:</label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            placeholder="새 비밀번호 (최소 6자)"
+                        />
+                    </div>
+
+                    <button onclick="changePassword()">Change Password</button>
+                </div>
+
+                <!-- UPDATE PROFILE TAB -->
+                <div id="tab-profile" class="tab-content">
+                    <h3>👤 Update Profile</h3>
+
+                    <div
+                        style="
+                            background-color: #f8d7da;
+                            padding: 10px;
+                            border-radius: 4px;
+                            margin-bottom: 15px;
+                            font-size: 13px;
+                        "
+                    >
+                        ⚠️ <strong>주의:</strong> 이메일 변경 시 로그인 이메일도
+                        변경되며, 이메일 인증 상태가 해제됩니다.
+                    </div>
+
+                    <form id="profileForm" onsubmit="updateProfile(event)">
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Your name"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nickname:</label>
+                            <input
+                                type="text"
+                                name="nickname"
+                                placeholder="Your nickname"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="your@email.com"
+                            />
+                            <label style="font-weight: normal; font-size: 12px">
+                                <input
+                                    type="checkbox"
+                                    name="email_public"
+                                    value="true"
+                                />
+                                Make email public
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number:</label>
+                            <input
+                                type="text"
+                                name="phone_number"
+                                placeholder="+821012345678"
+                            />
+                            <label style="font-weight: normal; font-size: 12px">
+                                <input
+                                    type="checkbox"
+                                    name="phone_number_public"
+                                    value="true"
+                                />
+                                Make phone number public
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Gender:</label>
+                            <select name="gender">
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <label style="font-weight: normal; font-size: 12px">
+                                <input
+                                    type="checkbox"
+                                    name="gender_public"
+                                    value="true"
+                                />
+                                Make gender public
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Birthdate:</label>
+                            <input
+                                type="text"
+                                name="birthdate"
+                                placeholder="YYYY-MM-DD"
+                            />
+                            <label style="font-weight: normal; font-size: 12px">
+                                <input
+                                    type="checkbox"
+                                    name="birthdate_public"
+                                    value="true"
+                                />
+                                Make birthdate public
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address:</label>
+                            <textarea
+                                name="address"
+                                rows="3"
+                                placeholder="Your address"
+                            ></textarea>
+                            <label style="font-weight: normal; font-size: 12px">
+                                <input
+                                    type="checkbox"
+                                    name="address_public"
+                                    value="true"
+                                />
+                                Make address public
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Profile Picture URL:</label>
+                            <input
+                                type="text"
+                                name="picture"
+                                placeholder="https://example.com/profile.jpg"
+                            />
+                            <small
+                                style="
+                                    color: #666;
+                                    display: block;
+                                    margin-top: 5px;
+                                "
+                            >
+                                💡 Tip: 파일은 Database의 Files 탭에서 먼저
+                                업로드하고 URL을 여기에 입력하세요.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Profile Page URL:</label>
+                            <input
+                                type="text"
+                                name="profile"
+                                placeholder="https://yourprofile.com"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Website URL:</label>
+                            <input
+                                type="text"
+                                name="website"
+                                placeholder="https://yourwebsite.com"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Misc (본인만 보는 메모):</label>
+                            <textarea
+                                name="misc"
+                                rows="3"
+                                placeholder="개인 메모 (다른 사용자에게 보이지 않음)"
+                            ></textarea>
+                        </div>
+
+                        <button type="submit" class="success">
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+
+                <!-- DISABLE/RECOVER TAB -->
+                <div id="tab-disable" class="tab-content">
+                    <h3>🗑️ Disable/Recover Account</h3>
+
+                    <div
+                        style="
+                            background-color: #f8d7da;
+                            padding: 10px;
+                            border-radius: 4px;
+                            margin-bottom: 15px;
+                            font-size: 13px;
+                        "
+                    >
+                        ⚠️ <strong>경고:</strong> 계정을 비활성화하면 자동으로
+                        로그아웃되며, 이메일 인증이 되어있어야 복구 가능합니다.
+                    </div>
+
+                    <button onclick="disableAccount()" class="danger">
+                        Disable My Account
+                    </button>
+
+                    <hr />
+
+                    <h3>복구 (Recover Account)</h3>
+                    <p style="font-size: 13px; color: #666">
+                        계정이 비활성화된 경우, 로그인 시도 시 복구 프로세스가
+                        시작됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Profile Info -->
+            <div class="panel">
+                <h2>📊 User Information</h2>
+
+                <button onclick="getMyProfile()">Get My Profile</button>
+
+                <div id="profileInfo" style="margin-top: 15px; display: none">
+                    <h3>Current Profile:</h3>
+                    <div
+                        id="profileContent"
+                        style="
+                            background-color: #fff;
+                            padding: 10px;
+                            border-radius: 4px;
+                            border: 1px solid #ddd;
+                        "
+                    ></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Log Panel (Full Width) -->
+        <div class="panel" style="margin-top: 20px">
+            <h2>📋 Result Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="resultLog"></div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+        <script src="service.js"></script>
+        <script>
+            // Tab switching
+            function switchTab(tab) {
+                document
+                    .querySelectorAll(".tab-content")
+                    .forEach((tc) => tc.classList.remove("active"));
+                document
+                    .querySelectorAll(".tab")
+                    .forEach((t) => t.classList.remove("active"));
+                document.getElementById("tab-" + tab).classList.add("active");
+                event.target.classList.add("active");
+            }
+
+            // Log functions
+            function addLog(type, title, data) {
+                const log = document.getElementById("resultLog");
+                const item = document.createElement("div");
+                item.className = `result-item ${type}`;
+
+                const time = new Date().toLocaleTimeString("ko-KR");
+                item.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 5px;">${title}</div>
+                <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(
+                    data,
+                    null,
+                    2
+                )}</pre>
+                <div style="font-size: 10px; color: #666; margin-top: 5px;">${time}</div>
+            `;
+
+                log.insertBefore(item, log.firstChild);
+            }
+
+            function clearLog() {
+                document.getElementById("resultLog").innerHTML = "";
+            }
+
+            // ==================== EMAIL VERIFICATION ====================
+            async function sendVerificationCode() {
+                try {
+                    const result = await skapi.verifyEmail();
+                    addLog("success", "📤 Verification Code Sent", result);
+                    alert(
+                        "인증 코드가 이메일로 전송되었습니다. 이메일을 확인하세요."
+                    );
+                } catch (error) {
+                    addLog("error", "❌ Send Failed", error.message);
+                }
+            }
+
+            async function verifyEmailWithCode() {
+                try {
+                    const code = document
+                        .getElementById("verificationCode")
+                        .value.trim();
+                    if (!code) {
+                        alert("인증 코드를 입력하세요.");
+                        return;
+                    }
+
+                    const result = await skapi.verifyEmail({ code });
+                    addLog("success", "✅ Email Verified", result);
+                    alert("이메일 인증이 완료되었습니다!");
+                    document.getElementById("verificationCode").value = "";
+                } catch (error) {
+                    addLog("error", "❌ Verification Failed", error.message);
+                }
+            }
+
+            // ==================== CHANGE PASSWORD ====================
+            async function changePassword() {
+                try {
+                    const currentPassword =
+                        document.getElementById("currentPassword").value;
+                    const newPassword =
+                        document.getElementById("newPassword").value;
+
+                    if (!currentPassword || !newPassword) {
+                        alert("현재 비밀번호와 새 비밀번호를 모두 입력하세요.");
+                        return;
+                    }
+
+                    const result = await skapi.changePassword({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                    });
+
+                    addLog("success", "🔐 Password Changed", result);
+                    alert("비밀번호가 변경되었습니다.");
+                    document.getElementById("currentPassword").value = "";
+                    document.getElementById("newPassword").value = "";
+                } catch (error) {
+                    addLog("error", "❌ Change Password Failed", error.message);
+                }
+            }
+
+            // ==================== UPDATE PROFILE ====================
+            async function updateProfile(event) {
+                event.preventDefault();
+
+                try {
+                    const form = event.target;
+                    const formData = new FormData(form);
+                    const params = {};
+
+                    // 모든 필드 수집 (빈 값도 포함)
+                    for (let [key, value] of formData.entries()) {
+                        // 체크박스는 true/false로 처리
+                        if (key.endsWith("_public")) {
+                            params[key] = form.querySelector(
+                                `[name="${key}"]`
+                            ).checked;
+                        } else if (value.trim()) {
+                            // 빈 문자열이 아닌 경우만 추가
+                            params[key] = value;
+                        }
+                    }
+
+                    // public 체크박스들이 체크되지 않은 경우 false로 명시적으로 설정
+                    const publicFields = [
+                        "email_public",
+                        "phone_number_public",
+                        "address_public",
+                        "gender_public",
+                        "birthdate_public",
+                    ];
+                    publicFields.forEach((field) => {
+                        if (!(field in params)) {
+                            params[field] = false;
+                        }
+                    });
+
+                    addLog("info", "🔄 Updating Profile with params", params);
+                    const result = await skapi.updateProfile(params);
+
+                    addLog("success", "✅ Profile Updated", result);
+                    alert("프로필이 업데이트되었습니다.");
+                } catch (error) {
+                    addLog("error", "❌ Update Failed", error.message);
+                }
+            }
+
+            // ==================== GET PROFILE ====================
+            async function getMyProfile() {
+                try {
+                    const result = await skapi.getProfile();
+
+                    addLog("info", "📊 My Profile", result);
+
+                    // Display profile info
+                    const profileInfo = document.getElementById("profileInfo");
+                    const profileContent =
+                        document.getElementById("profileContent");
+
+                    profileContent.innerHTML = `
+                        <p><strong>User ID:</strong> ${result.user_id}</p>
+                        <p><strong>Email:</strong> ${result.email} ${
+                        result.email_public ? "🌐" : "🔒"
+                    }</p>
+                        <p><strong>Email Verified:</strong> ${
+                            result.email_verified ? "✅ Yes" : "❌ No"
+                        }</p>
+                        <p><strong>Name:</strong> ${result.name || "N/A"}</p>
+                        <p><strong>Nickname:</strong> ${
+                            result.nickname || "N/A"
+                        }</p>
+                        <p><strong>Phone:</strong> ${
+                            result.phone_number || "N/A"
+                        } ${result.phone_number_public ? "🌐" : "🔒"}</p>
+                        <p><strong>Gender:</strong> ${result.gender || "N/A"} ${
+                        result.gender_public ? "🌐" : "🔒"
+                    }</p>
+                        <p><strong>Birthdate:</strong> ${
+                            result.birthdate || "N/A"
+                        } ${result.birthdate_public ? "🌐" : "🔒"}</p>
+                        <p><strong>Address:</strong> ${
+                            result.address || "N/A"
+                        } ${result.address_public ? "🌐" : "🔒"}</p>
+                        <p><strong>Picture:</strong> ${
+                            result.picture
+                                ? `<a href="${result.picture}" target="_blank">View</a>`
+                                : "N/A"
+                        }</p>
+                        <p><strong>Profile URL:</strong> ${
+                            result.profile
+                                ? `<a href="${result.profile}" target="_blank">${result.profile}</a>`
+                                : "N/A"
+                        }</p>
+                        <p><strong>Website:</strong> ${
+                            result.website
+                                ? `<a href="${result.website}" target="_blank">${result.website}</a>`
+                                : "N/A"
+                        }</p>
+                        <p><strong>Misc:</strong> ${result.misc || "N/A"}</p>
+                        <p><strong>Account Created:</strong> ${new Date(
+                            result.timestamp
+                        ).toLocaleString("ko-KR")}</p>
+                        <p style="font-size: 11px; color: #666; margin-top: 10px;">🌐 = Public, 🔒 = Private</p>
+                    `;
+
+                    profileInfo.style.display = "block";
+                } catch (error) {
+                    addLog("error", "❌ Get Profile Failed", error.message);
+                }
+            }
+
+            // ==================== DISABLE ACCOUNT ====================
+            async function disableAccount() {
+                try {
+                    const confirmed = confirm(
+                        "정말로 계정을 비활성화하시겠습니까? 이메일 인증이 되어있어야 복구 가능합니다."
+                    );
+                    if (!confirmed) return;
+
+                    const result = await skapi.disableAccount();
+                    addLog("success", "🗑️ Account Disabled", result);
+                    alert(
+                        "계정이 비활성화되었습니다. 자동으로 로그아웃됩니다."
+                    );
+                } catch (error) {
+                    addLog("error", "❌ Disable Failed", error.message);
+                }
+            }
+
+            // Check login status on page load
+            window.addEventListener("load", async () => {
+                try {
+                    const user = await skapi.getProfile();
+                    document.getElementById("loggedUser").textContent =
+                        user.email;
+                } catch (error) {
+                    document.getElementById("loggedUser").textContent =
+                        "Not logged in";
+                }
+            });
+        </script>
+    </body>
+</html>

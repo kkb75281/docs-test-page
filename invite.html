@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>로그인 페이지</title>
+    </head>
+    <link rel="stylesheet" href="style.css" />
+    <body>
+        <a class="btn home" href="index.html">홈으로</a>
+        <p id="loggedUser"></p>
+        <h1>초대하기</h1>
+        <form
+            onsubmit="skapi.inviteUser(event).then(r=>alert(r)).catch(err=>alert(err.message))"
+        >
+            <label>
+                이름
+                <br />
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="이름"
+                    required
+                /> </label
+            ><br /><br />
+            <label>
+                이메일
+                <br />
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="이메일 주소"
+                    required
+                /> </label
+            ><br /><br />
+            <input type="submit" value="초대하기" />
+        </form>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+    <script src="service.js"></script>
+    <script></script>
+</html>

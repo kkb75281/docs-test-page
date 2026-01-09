@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>new-version-test-html</title>
+    </head>
+    <link rel="stylesheet" href="style.css" />
+    <body>
+        <a class="btn home" href="index.html">홈으로</a>
+        <p id="loggedUser"></p>
+
+        <br />
+        <br />
+
+        <h3>문의 보내기</h3>
+        <label for="name">이름</label>
+        <input type="text" name="name" placeholder="이름" />
+        <label for="email">이메일</label>
+        <input type="text" name="email" placeholder="user@email.com" />
+        <label for="subject">제목</label>
+        <input type="text" name="subject" placeholder="제목" />
+        <label for="message">내용</label>
+        <textarea name="message" placeholder="내용"></textarea>
+        <button type="button" onclick="sendInquiry()">보내기</button>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/skapi-js@latest/dist/skapi.js"></script>
+    <script src="service.js"></script>
+    <script>
+        function sendInquiry() {
+            skapi
+                .sendInquiry({
+                    name: document.querySelector('input[name="name"]').value,
+                    email: document.querySelector('input[name="email"]').value,
+                    subject: document.querySelector('input[name="subject"]')
+                        .value,
+                    message: document.querySelector('textarea[name="message"]')
+                        .value,
+                })
+                .then((res) => alert("문의가 성공적으로 전송되었습니다."))
+                .catch((err) =>
+                    alert("문의 전송에 실패했습니다: " + err.message)
+                );
+        }
+    </script>
+</html>
