@@ -886,6 +886,749 @@
                         cursor: pointer;
                         font-weight: bold;
                         margin-bottom: 10px;
+                        color: #dc3545;
+                    "
+                >
+                    ✅ is_subscription_record 상세 테스트 체크리스트
+                </summary>
+
+                <div
+                    style="
+                        background-color: #e7f3ff;
+                        padding: 10px;
+                        border-radius: 4px;
+                        margin-bottom: 15px;
+                    "
+                >
+                    <strong>📋 테스트 준비:</strong>
+                    <ul style="margin: 5px 0; line-height: 1.8">
+                        <li>✅ 2개 이상의 계정 필요 (예: 유저A, 유저B)</li>
+                        <li>✅ 각 계정의 user_id 미리 복사해두기</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: #007bff; margin-top: 15px">
+                    테스트 1: 기본 구독 레코드 생성 및 피드 확인
+                </h4>
+                <table
+                    style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                        margin-top: 10px;
+                    "
+                >
+                    <tr style="background-color: #f0f0f0">
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 10%;
+                            "
+                        >
+                            순서
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 15%;
+                            "
+                        >
+                            계정
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 8px">
+                            작업
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 25%;
+                            "
+                        >
+                            예상 결과
+                        </th>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            1
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Subscription 탭 → User ID to Subscribe에 유저A의
+                            user_id 입력 → Subscribe 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ "Subscribed" 성공 메시지
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            2
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Subscriptions 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 유저A가 구독 목록에 표시됨
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            3
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저A
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Create 탭 → Data:
+                            <code>{"title": "테스트 포스트 1"}</code><br />
+                            Table: posts, Access: public<br />
+                            ✅ Is Subscription Record<br />
+                            ✅ Upload to Feed<br />
+                            → Create Record
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 레코드 생성 성공 + record_id 반환
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            4
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Subscription 탭 → Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 유저A의 "테스트 포스트 1"이 피드에 표시됨
+                        </td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #007bff; margin-top: 20px">
+                    테스트 2: Upload to Feed 없이 생성 (피드에 안 나타남)
+                </h4>
+                <table
+                    style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                        margin-top: 10px;
+                    "
+                >
+                    <tr style="background-color: #f0f0f0">
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 10%;
+                            "
+                        >
+                            순서
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 15%;
+                            "
+                        >
+                            계정
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 8px">
+                            작업
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 25%;
+                            "
+                        >
+                            예상 결과
+                        </th>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            1
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저A
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Create 탭 → Data:
+                            <code>{"title": "비공개 포스트"}</code><br />
+                            ✅ Is Subscription Record만 체크<br />
+                            ❌ Upload to Feed는 체크 안 함<br />
+                            → Create Record
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 레코드 생성 성공
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            2
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ❌ "비공개 포스트"는 피드에 안 나타남 (이전 포스트만
+                            보임)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            3
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Read 탭 → Table: posts<br />
+                            Subscription: 유저A의 user_id 입력<br />
+                            → Get Records
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ "비공개 포스트"를 포함한 모든 subscription 레코드
+                            표시됨
+                        </td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #007bff; margin-top: 20px">
+                    테스트 3: 구독 전 생성된 레코드 (피드에 안 나타남)
+                </h4>
+                <table
+                    style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                        margin-top: 10px;
+                    "
+                >
+                    <tr style="background-color: #f0f0f0">
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 10%;
+                            "
+                        >
+                            순서
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 15%;
+                            "
+                        >
+                            계정
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 8px">
+                            작업
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 25%;
+                            "
+                        >
+                            예상 결과
+                        </th>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            1
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저C
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            (아직 유저A를 구독 안 한 상태)<br />
+                            유저A가 새 포스트 생성 (Is Subscription + Upload to
+                            Feed 체크)
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 레코드 생성 성공
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            2
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저C
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            이제 유저A를 Subscribe
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 구독 성공
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            3
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저C
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ❌ 구독 전에 생성된 포스트는 피드에 안 나타남 (빈
+                            목록)
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            4
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저A
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            새 포스트 생성 (구독 이후)
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 레코드 생성
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            5
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저C
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 이제 새 포스트가 피드에 표시됨
+                        </td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #007bff; margin-top: 20px">
+                    테스트 4: 구독자 차단 테스트
+                </h4>
+                <table
+                    style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                        margin-top: 10px;
+                    "
+                >
+                    <tr style="background-color: #f0f0f0">
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 10%;
+                            "
+                        >
+                            순서
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 15%;
+                            "
+                        >
+                            계정
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 8px">
+                            작업
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 25%;
+                            "
+                        >
+                            예상 결과
+                        </th>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            1
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저A
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Subscription 탭 → Block User ID에 유저B의 user_id
+                            입력<br />
+                            → Block Subscriber 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ "Subscriber Blocked" 메시지
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            2
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ❌ 유저A의 포스트가 피드에 안 나타남
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            3
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Read 탭에서 유저A의 subscription 레코드 조회 시도
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ❌ 접근 불가 (차단됨)
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            4
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저A
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Unblock Subscriber 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ "Subscriber Unblocked" 메시지
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            5
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 다시 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 유저A의 포스트가 다시 피드에 표시됨
+                        </td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #007bff; margin-top: 20px">
+                    테스트 5: 구독 취소 테스트
+                </h4>
+                <table
+                    style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 13px;
+                        margin-top: 10px;
+                    "
+                >
+                    <tr style="background-color: #f0f0f0">
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 10%;
+                            "
+                        >
+                            순서
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 15%;
+                            "
+                        >
+                            계정
+                        </th>
+                        <th style="border: 1px solid #ddd; padding: 8px">
+                            작업
+                        </th>
+                        <th
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                width: 25%;
+                            "
+                        >
+                            예상 결과
+                        </th>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            1
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed → 유저A의 포스트들 확인
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 여러 개의 포스트 표시됨
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            2
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            User ID to Subscribe에 유저A의 user_id 입력<br />
+                            → Unsubscribe 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ "Unsubscribed" 메시지
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            3
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ❌ 유저A의 모든 과거 포스트가 피드에서 사라짐
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9">
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            4
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            다시 유저A를 Subscribe
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ✅ 구독 성공
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: center;
+                            "
+                        >
+                            5
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            유저B
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            Get My Feed 클릭
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px">
+                            ❌ 과거 포스트는 여전히 안 보임 (재구독 이후 생성된
+                            것만 보임)
+                        </td>
+                    </tr>
+                </table>
+
+                <div
+                    style="
+                        background-color: #d1ecf1;
+                        border: 1px solid #17a2b8;
+                        border-radius: 4px;
+                        padding: 10px;
+                        margin-top: 15px;
+                    "
+                >
+                    <strong>💡 디버깅 팁:</strong>
+                    <ul style="margin: 5px 0; line-height: 1.8">
+                        <li>
+                            <code>Debug: Check Subscription Status</code> - 현재
+                            구독 상태 확인
+                        </li>
+                        <li>
+                            <code>Debug: Check Feed Records</code> - 피드
+                            레코드가 제대로 생성되었는지 확인
+                        </li>
+                        <li>
+                            <code>Get My Subscriptions</code> - 구독 목록 확인
+                        </li>
+                        <li>
+                            Read 탭에서 Subscription 필드에 user_id 입력하여
+                            구독 레코드 직접 조회 가능
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details style="margin-top: 15px">
+                <summary
+                    style="
+                        cursor: pointer;
+                        font-weight: bold;
+                        margin-bottom: 10px;
                     "
                 >
                     🔐 프라이빗 접근 관리 테스트
@@ -1155,9 +1898,43 @@
 
                     <div class="form-group">
                         <label>
+                            <input
+                                type="checkbox"
+                                id="createIsSubscriptionRecord"
+                            />
+                            Is Subscription Record (구독 레코드로 생성)
+                        </label>
+                        <div
+                            style="
+                                background-color: #fff3cd;
+                                padding: 8px;
+                                border-radius: 4px;
+                                margin-top: 5px;
+                                font-size: 12px;
+                            "
+                        >
+                            ⚠️ 이 옵션을 체크하면 레코드가 구독 테이블에
+                            생성됩니다. 구독자만 접근할 수 있습니다.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
                             <input type="checkbox" id="createUploadToFeed" />
                             Upload to Feed (구독자 피드에 표시)
                         </label>
+                        <div
+                            style="
+                                background-color: #d1ecf1;
+                                padding: 8px;
+                                border-radius: 4px;
+                                margin-top: 5px;
+                                font-size: 12px;
+                            "
+                        >
+                            💡 구독자가 getFeed()로 이 레코드를 볼 수 있습니다.
+                            is_subscription_record가 필요합니다.
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -1368,6 +2145,27 @@
                         />
                     </div>
 
+                    <div class="form-group">
+                        <label>Subscription (optional):</label>
+                        <input
+                            type="text"
+                            id="readSubscription"
+                            placeholder="user_id (구독 레코드 조회)"
+                        />
+                        <div
+                            style="
+                                background-color: #fff3cd;
+                                padding: 8px;
+                                border-radius: 4px;
+                                margin-top: 5px;
+                                font-size: 12px;
+                            "
+                        >
+                            💡 특정 사용자의 구독 레코드를 조회할 때 사용.
+                            user_id를 입력하세요.
+                        </div>
+                    </div>
+
                     <div class="inline-group">
                         <div class="form-group">
                             <label>Limit:</label>
@@ -1488,6 +2286,16 @@
                     >
                         📢 Subscription Options
                     </h3>
+
+                    <div class="form-group">
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="updateIsSubscriptionRecord"
+                            />
+                            Is Subscription Record
+                        </label>
+                    </div>
 
                     <div class="form-group">
                         <label>
@@ -2019,6 +2827,9 @@
                         config.readonly = true;
 
                     // Subscription options
+                    const isSubscriptionRecordChecked = document.getElementById(
+                        "createIsSubscriptionRecord"
+                    ).checked;
                     const uploadFeedChecked =
                         document.getElementById("createUploadToFeed").checked;
                     const notifySubChecked = document.getElementById(
@@ -2032,6 +2843,7 @@
                     ).checked;
 
                     if (
+                        isSubscriptionRecordChecked ||
                         uploadFeedChecked ||
                         notifySubChecked ||
                         feedRefChecked ||
@@ -2039,6 +2851,9 @@
                     ) {
                         config.table.subscription = {};
 
+                        if (isSubscriptionRecordChecked) {
+                            config.table.subscription.is_subscription_record = true;
+                        }
                         if (uploadFeedChecked) {
                             config.table.subscription.upload_to_feed = true;
                         }
@@ -2173,6 +2988,13 @@
                                 .getElementById("readReference")
                                 .value.trim();
                             if (reference) query.reference = reference;
+
+                            const subscription = document
+                                .getElementById("readSubscription")
+                                .value.trim();
+                            if (subscription) {
+                                query.table.subscription = subscription;
+                            }
                         }
                     }
 
@@ -2391,6 +3213,9 @@
                         document.getElementById("updateAccessGroup").value;
 
                     // Check if any subscription options are set
+                    const isSubscriptionRecordChecked = document.getElementById(
+                        "updateIsSubscriptionRecord"
+                    ).checked;
                     const uploadFeedChecked =
                         document.getElementById("updateUploadToFeed").checked;
                     const notifySubChecked = document.getElementById(
@@ -2415,6 +3240,7 @@
                     // This ensures unchecked boxes are also updated as false
                     if (
                         config.table ||
+                        isSubscriptionRecordChecked ||
                         uploadFeedChecked ||
                         notifySubChecked ||
                         feedRefChecked ||
@@ -2423,6 +3249,7 @@
                         if (!config.table) config.table = {};
 
                         config.table.subscription = {
+                            is_subscription_record: isSubscriptionRecordChecked,
                             upload_to_feed: uploadFeedChecked,
                             notify_subscribers: notifySubChecked,
                             feed_referencing_records: feedRefChecked,

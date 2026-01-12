@@ -107,6 +107,28 @@
                 font-weight: bold;
                 font-size: 13px;
             }
+            .form-group-with-public {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 10px;
+                align-items: start;
+            }
+            .public-checkbox {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding-top: 30px;
+                white-space: nowrap;
+            }
+            .public-checkbox input[type="checkbox"] {
+                width: auto;
+                margin: 0;
+            }
+            .public-checkbox label {
+                margin: 0;
+                font-weight: normal;
+                font-size: 12px;
+            }
             .user-info {
                 background-color: #e9ecef;
                 padding: 10px;
@@ -282,8 +304,15 @@
                         <ul>
                             <li>"Update Profile" 탭 이동</li>
                             <li>Name, Email, Gender 등 정보 입력</li>
-                            <li>Profile Picture 선택 (선택사항)</li>
+                            <li>
+                                Profile Picture 파일 선택 (선택사항) - 또는 URL
+                                직접 입력
+                            </li>
                             <li>"Update Profile" 클릭</li>
+                            <li>
+                                ✅ 파일이 선택된 경우 자동으로 업로드 후 프로필
+                                업데이트
+                            </li>
                             <li>✅ 업데이트 성공 메시지 확인</li>
                         </ul>
                     </li>
@@ -519,8 +548,8 @@
                     >
                         ⚠️ <strong>중요:</strong> Profile 속성은 문자열(string)
                         값만 허용합니다.<br />
-                        이미지 파일 업로드가 필요한 경우, Database의 Files
-                        탭에서 먼저 파일을 업로드한 후 URL을 사용하세요.
+                        이미지 파일은 아래 파일 선택 버튼을 통해 직접 업로드할
+                        수 있습니다.
                     </div>
 
                     <form id="profileForm" onsubmit="updateProfile(event)">
@@ -534,57 +563,130 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Email:</label>
+                            <div class="form-group-with-public">
+                                <div>
+                                    <label>Email:</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="your@email.com"
+                                    />
+                                </div>
+                                <div class="public-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="email_public"
+                                        id="email_public"
+                                    />
+                                    <label for="email_public">🌐 Public</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-group-with-public">
+                                <div>
+                                    <label>Phone Number:</label>
+                                    <input
+                                        type="text"
+                                        name="phone_number"
+                                        placeholder="+821012345678"
+                                    />
+                                </div>
+                                <div class="public-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="phone_number_public"
+                                        id="phone_number_public"
+                                    />
+                                    <label for="phone_number_public"
+                                        >🌐 Public</label
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-group-with-public">
+                                <div>
+                                    <label>Gender:</label>
+                                    <select name="gender">
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="public-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="gender_public"
+                                        id="gender_public"
+                                    />
+                                    <label for="gender_public">🌐 Public</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-group-with-public">
+                                <div>
+                                    <label>Birthdate:</label>
+                                    <input
+                                        type="text"
+                                        name="birthdate"
+                                        placeholder="YYYY-MM-DD"
+                                    />
+                                </div>
+                                <div class="public-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="birthdate_public"
+                                        id="birthdate_public"
+                                    />
+                                    <label for="birthdate_public"
+                                        >🌐 Public</label
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-group-with-public">
+                                <div>
+                                    <label>Address:</label>
+                                    <textarea
+                                        name="address"
+                                        rows="3"
+                                        placeholder="Your address"
+                                    ></textarea>
+                                </div>
+                                <div class="public-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="address_public"
+                                        id="address_public"
+                                    />
+                                    <label for="address_public"
+                                        >🌐 Public</label
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Profile Picture:</label>
                             <input
-                                type="email"
-                                name="email"
-                                placeholder="your@email.com"
+                                type="file"
+                                id="pictureFile"
+                                accept="image/*"
+                                style="margin-bottom: 10px"
                             />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Phone Number:</label>
-                            <input
-                                type="text"
-                                name="phone_number"
-                                placeholder="+821012345678"
-                            />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Gender:</label>
-                            <select name="gender">
-                                <option value="">Select gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Birthdate:</label>
-                            <input
-                                type="text"
-                                name="birthdate"
-                                placeholder="YYYY-MM-DD"
-                            />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Address:</label>
-                            <textarea
-                                name="address"
-                                rows="3"
-                                placeholder="Your address"
-                            ></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Profile Picture URL:</label>
                             <input
                                 type="text"
                                 name="picture"
-                                placeholder="https://example.com/profile.jpg"
+                                id="pictureURL"
+                                placeholder="또는 이미지 URL을 직접 입력"
                             />
                             <div
                                 style="
@@ -595,11 +697,9 @@
                                     font-size: 12px;
                                 "
                             >
-                                💡 <strong>이미지 업로드 방법:</strong><br />
-                                1. Database 페이지의 Files 탭으로 이동<br />
-                                2. Public 이미지 파일 업로드 (postRecord
-                                사용)<br />
-                                3. 업로드된 파일의 URL을 복사하여 여기에 입력
+                                💡 <strong>이미지 업로드:</strong><br />
+                                파일을 선택하고 "Update Profile"을 클릭하면
+                                자동으로 업로드됩니다.
                             </div>
                         </div>
 
@@ -872,7 +972,7 @@
         <script src="../service.js"></script>
         <script>
             // Tab switching
-            function switchTab(tab) {
+            async function switchTab(tab) {
                 document
                     .querySelectorAll(".tab-content")
                     .forEach((tc) => tc.classList.remove("active"));
@@ -881,6 +981,60 @@
                     .forEach((t) => t.classList.remove("active"));
                 document.getElementById("tab-" + tab).classList.add("active");
                 event.target.classList.add("active");
+
+                // Update Profile 탭으로 전환시 현재 유저 정보 로드
+                if (tab === "profile") {
+                    await loadProfileData();
+                }
+            }
+
+            // 프로필 데이터를 폼에 로드하는 함수
+            async function loadProfileData() {
+                try {
+                    const profile = await skapi.getProfile();
+                    const form = document.getElementById("profileForm");
+
+                    // 각 필드에 값 설정
+                    if (form.name) form.name.value = profile.name || "";
+                    if (form.email) form.email.value = profile.email || "";
+                    if (form.phone_number)
+                        form.phone_number.value = profile.phone_number || "";
+                    if (form.gender) form.gender.value = profile.gender || "";
+                    if (form.birthdate)
+                        form.birthdate.value = profile.birthdate || "";
+                    if (form.address)
+                        form.address.value = profile.address || "";
+                    if (form.nickname)
+                        form.nickname.value = profile.nickname || "";
+                    if (form.profile)
+                        form.profile.value = profile.profile || "";
+                    if (form.website)
+                        form.website.value = profile.website || "";
+                    if (form.misc) form.misc.value = profile.misc || "";
+
+                    // Picture URL 설정
+                    const pictureURL = document.getElementById("pictureURL");
+                    if (pictureURL) pictureURL.value = profile.picture || "";
+
+                    // Public 체크박스 설정
+                    if (form.email_public)
+                        form.email_public.checked =
+                            profile.email_public || false;
+                    if (form.phone_number_public)
+                        form.phone_number_public.checked =
+                            profile.phone_number_public || false;
+                    if (form.gender_public)
+                        form.gender_public.checked =
+                            profile.gender_public || false;
+                    if (form.birthdate_public)
+                        form.birthdate_public.checked =
+                            profile.birthdate_public || false;
+                    if (form.address_public)
+                        form.address_public.checked =
+                            profile.address_public || false;
+                } catch (error) {
+                    console.error("프로필 로드 실패:", error);
+                }
             }
 
             // Log functions
@@ -964,11 +1118,68 @@
 
                 try {
                     const form = event.target;
+                    const pictureFile = document.getElementById("pictureFile");
+                    const pictureURL = document.getElementById("pictureURL");
+
+                    // 파일이 선택되었으면 먼저 업로드
+                    if (pictureFile.files && pictureFile.files.length > 0) {
+                        addLog(
+                            "info",
+                            "📤 Uploading picture...",
+                            "파일 업로드 중..."
+                        );
+
+                        // FormData를 만들어서 파일 업로드
+                        const formData = new FormData();
+                        formData.append("pictureFile", pictureFile.files[0]);
+
+                        const uploadConfig = {
+                            table: {
+                                name: "user_profile_pictures",
+                                access_group: "public",
+                            },
+                        };
+
+                        try {
+                            const uploadResult = await skapi.postRecord(
+                                formData,
+                                uploadConfig
+                            );
+
+                            // 업로드된 파일의 URL 가져오기
+                            if (
+                                uploadResult.bin &&
+                                uploadResult.bin.pictureFile &&
+                                uploadResult.bin.pictureFile[0]
+                            ) {
+                                const uploadedFileURL =
+                                    uploadResult.bin.pictureFile[0].url;
+                                addLog("success", "✅ Picture Uploaded", {
+                                    url: uploadedFileURL,
+                                });
+
+                                // picture URL 필드에 업로드된 URL 설정
+                                pictureURL.value = uploadedFileURL;
+                            }
+                        } catch (uploadError) {
+                            addLog(
+                                "error",
+                                "❌ Picture Upload Failed",
+                                uploadError.message
+                            );
+                            alert("이미지 업로드 실패: " + uploadError.message);
+                            return;
+                        }
+                    }
+
+                    // 프로필 업데이트
                     const result = await skapi.updateProfile(event);
 
                     addLog("success", "✅ Profile Updated", result);
                     alert("프로필이 업데이트되었습니다.");
-                    form.reset();
+
+                    // 파일 입력 초기화
+                    pictureFile.value = "";
                 } catch (error) {
                     addLog("error", "❌ Update Failed", error.message);
                 }

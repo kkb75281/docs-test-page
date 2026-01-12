@@ -741,6 +741,72 @@
                     >
                         알림 구독 해제
                     </button>
+                    <button
+                        onclick="testLocalNotification()"
+                        style="background-color: #6c757d"
+                    >
+                        🔔 로컬 알림 테스트
+                    </button>
+                </div>
+
+                <div
+                    class="form-group"
+                    style="
+                        background-color: #fff3cd;
+                        padding: 10px;
+                        border-radius: 4px;
+                        font-size: 13px;
+                    "
+                >
+                    <strong>💡 알림이 안 보이는 경우 체크리스트:</strong>
+                    <ol
+                        style="
+                            margin: 10px 0;
+                            padding-left: 20px;
+                            line-height: 1.8;
+                        "
+                    >
+                        <li>브라우저 알림 권한이 허용되어 있는지 확인</li>
+                        <li>
+                            브라우저 설정에서 사이트 알림이 차단되지 않았는지
+                            확인
+                        </li>
+                        <li>데스크탑 알림 설정이 켜져 있는지 확인 (OS 설정)</li>
+                        <li>
+                            다른 탭/창이나 다른 기기에서 메시지를 보내야 알림이
+                            옴
+                        </li>
+                        <li>
+                            <strong
+                                >현재 포커스된 탭에서는 알림이 안 올 수
+                                있음</strong
+                            >
+                        </li>
+                        <li>
+                            "항상 알림 보내기" 체크박스를 선택하면 온라인
+                            상태에도 알림
+                        </li>
+                    </ol>
+                    <div
+                        style="
+                            margin-top: 10px;
+                            padding: 8px;
+                            background-color: #d1ecf1;
+                            border-radius: 4px;
+                        "
+                    >
+                        <strong>🔍 디버그 정보:</strong>
+                        <div
+                            id="debugInfo"
+                            style="
+                                font-family: monospace;
+                                font-size: 11px;
+                                margin-top: 5px;
+                            "
+                        >
+                            브라우저 정보 로딩 중...
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1393,22 +1459,44 @@
                         return;
                     }
 
+                    // Check notification support
+                    if (!("Notification" in window)) {
+                        alert("이 브라우저는 알림을 지원하지 않습니다");
+                        return;
+                    }
+
+                    console.log(
+                        "Current notification permission:",
+                        Notification.permission
+                    );
+
                     // Request notification permission
                     const permission = await Notification.requestPermission();
+                    console.log("Permission result:", permission);
+
                     if (permission !== "granted") {
-                        alert("Permission not granted for notifications");
+                        alert(
+                            "알림 권한이 거부되었습니다. 브라우저 설정에서 알림을 허용해주세요."
+                        );
                         return;
                     }
 
                     // Get VAPID key
                     const vapidResponse = await skapi.vapidPublicKey();
                     const vapid = vapidResponse.VAPIDPublicKey;
+                    console.log(
+                        "VAPID key received:",
+                        vapid.substring(0, 20) + "..."
+                    );
 
                     // Register service worker
                     const registration = await navigator.serviceWorker.register(
                         "/sw.js"
                     );
+                    console.log("Service worker registered:", registration);
+
                     await navigator.serviceWorker.ready;
+                    console.log("Service worker ready");
 
                     // Subscribe to push
                     const subscription =
@@ -1430,14 +1518,24 @@
                     updateNotificationStatus(true);
 
                     addToLog("success", {
-                        message: "알림 구독이 완료되었습니다",
+                        message:
+                            "✅ 알림 구독 완료! 이제 다른 탭이나 창에서 메시지를 보내면 알림이 표시됩니다.",
                     });
+
+                    // 테스트 알림 표시
+                    if (Notification.permission === "granted") {
+                        new Notification("알림 구독 성공!", {
+                            body: "푸시 알림이 정상적으로 설정되었습니다.",
+                        });
+                    }
                 } catch (error) {
                     console.error(
                         "Failed to subscribe to notifications:",
                         error
                     );
-                    addToLog("error", { message: error.message });
+                    addToLog("error", {
+                        message: "알림 구독 실패: " + error.message,
+                    });
                 }
             }
 
@@ -1620,6 +1718,151 @@
                         "Failed to check notification status:",
                         error
                     );
+                }
+
+                // Update debug info
+                updateDebugInfo();
+            }
+
+            // Update debug information
+            function updateDebugInfo() {
+                const debugDiv = document.getElementById("debugInfo");
+                if (!debugDiv) return;
+
+                const hasServiceWorker = "serviceWorker" in navigator;
+                const hasNotification = "Notification" in window;
+                const notificationPermission = hasNotification
+                    ? Notification.permission
+                    : "N/A";
+                const isSecureContext = window.isSecureContext;
+
+                debugDiv.innerHTML = `
+                    <div>• Service Worker 지원: ${
+                        hasServiceWorker ? "✅ Yes" : "❌ No"
+                    }</div>
+                    <div>• Notification API: ${
+                        hasNotification ? "✅ Yes" : "❌ No"
+                    }</div>
+                    <div>• 알림 권한: ${
+                        notificationPermission === "granted"
+                            ? "✅ Granted"
+                            : notificationPermission === "denied"
+                            ? "❌ Denied"
+                            : "⚠️ Default (미설정)"
+                    }</div>
+                    <div>• HTTPS 연결: ${
+                        isSecureContext ? "✅ Yes" : "❌ No (알림 작동 안함)"
+                    }</div>
+                    <div>• User Agent: ${navigator.userAgent
+                        .split(" ")
+                        .pop()}</div>
+                `;
+            }
+
+            // Test local notification
+            function testLocalNotification() {
+                if (!("Notification" in window)) {
+                    alert("이 브라우저는 알림을 지원하지 않습니다");
+                    addToLog("error", {
+                        message:
+                            "Notification API를 지원하지 않는 브라우저입니다",
+                    });
+                    return;
+                }
+
+                console.log(
+                    "Current Notification permission:",
+                    Notification.permission
+                );
+                addToLog("info", {
+                    message: `알림 권한 상태: ${Notification.permission}`,
+                });
+
+                if (Notification.permission === "granted") {
+                    try {
+                        const notification = new Notification("테스트 알림", {
+                            body: "로컬 알림이 정상적으로 작동합니다! 👍",
+                            tag: "test-notification",
+                            requireInteraction: false,
+                        });
+
+                        console.log("Notification created:", notification);
+
+                        notification.onclick = function () {
+                            console.log("Notification clicked!");
+                            addToLog("info", {
+                                message: "알림을 클릭했습니다",
+                            });
+                        };
+
+                        notification.onshow = function () {
+                            console.log("Notification shown!");
+                            addToLog("success", {
+                                message: "✅ 알림이 화면에 표시되었습니다",
+                            });
+                        };
+
+                        notification.onerror = function (e) {
+                            console.error("Notification error:", e);
+                            addToLog("error", {
+                                message: "알림 표시 중 에러 발생: " + e,
+                            });
+                        };
+
+                        notification.onclose = function () {
+                            console.log("Notification closed");
+                        };
+
+                        addToLog("info", {
+                            message:
+                                "알림 객체를 생성했습니다. 시스템 알림 설정을 확인하세요.\n💡 Tip: macOS는 시스템 환경설정 > 알림에서 브라우저 알림이 켜져있어야 합니다.",
+                        });
+                    } catch (error) {
+                        console.error("Failed to create notification:", error);
+                        addToLog("error", {
+                            message: "알림 생성 실패: " + error.message,
+                        });
+                    }
+                } else if (Notification.permission === "denied") {
+                    alert(
+                        "알림 권한이 차단되었습니다. 브라우저 설정에서 알림을 허용해주세요."
+                    );
+                    addToLog("error", {
+                        message:
+                            "알림 권한이 차단되었습니다. 브라우저 주소창 옆 자물쇠 아이콘을 클릭하여 알림을 허용해주세요.",
+                    });
+                } else {
+                    addToLog("info", {
+                        message: "알림 권한을 요청합니다...",
+                    });
+                    Notification.requestPermission().then((permission) => {
+                        console.log("Permission result:", permission);
+                        if (permission === "granted") {
+                            const notification = new Notification(
+                                "테스트 알림",
+                                {
+                                    body: "알림 권한이 허용되었습니다!",
+                                }
+                            );
+
+                            notification.onshow = function () {
+                                addToLog("success", {
+                                    message: "✅ 알림이 화면에 표시되었습니다",
+                                });
+                            };
+
+                            addToLog("success", {
+                                message:
+                                    "알림 권한이 허용되었습니다! 알림을 생성했습니다.",
+                            });
+                        } else {
+                            addToLog("error", {
+                                message:
+                                    "알림 권한이 거부되었습니다: " + permission,
+                            });
+                        }
+                        updateDebugInfo();
+                    });
                 }
             }
 
